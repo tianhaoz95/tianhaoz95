@@ -12,3 +12,4 @@
 - ⚡ Fun fact:
   - A boba a day keeps bugs away.
 
+![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=tianhaoz95&&show_icons=true&theme=radical)
