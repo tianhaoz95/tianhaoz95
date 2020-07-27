@@ -2,8 +2,6 @@
 
 <!--**tianhaoz95/tianhaoz95** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.-->
 
-[projects](./projects.md)
-
 - 🔭 I’m currently working on:
   - Ultronify
 - 💬 Ask me about:
