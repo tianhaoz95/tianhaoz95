@@ -1,12 +1,11 @@
 ### Hi there 👋
 
-<!--**tianhaoz95/tianhaoz95** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.-->
-
 - 🔭 I’m currently working on:
-  - Ultronify
+  - [Ultronify](https://github.com/ultronify): A collection of mini projects for hands-on **Reinforcement Learning** experiences.
+  - [Acumany Re](https://github.com/tianhaoz95/acumany-re): Rewind version of Acumany, a p2p platform to share experiences.
 - 💬 Ask me about:
-  - Flutter
-  - Reinforcement learning
+  - 📱 Mobile app development (Flutter/Swift UI)
+  - 🤖 Reinforcement learning
 - 📫 How to reach me:
   - Email me at jacksonzhou666@gmail.com
 - ⚡ Fun fact:
