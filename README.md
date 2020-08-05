@@ -2,7 +2,7 @@
 
 - 🔭 I’m currently working on:
   - [Ultronify](https://github.com/ultronify): A collection of mini projects for hands-on **Reinforcement Learning** experiences.
-  - [Acumany Re](https://github.com/tianhaoz95/acumany-re): Rewind version of Acumany, a p2p platform to share experiences.
+  - [Acumany Re](https://github.com/tianhaoz95/acumany-re): Rewind version of Acumany, a p2p platform to share knowledge.
 - 💬 Ask me about:
   - 📱 Mobile app development (Flutter/Swift UI)
   - 🤖 Reinforcement learning
