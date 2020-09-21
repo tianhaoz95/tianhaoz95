@@ -1,3 +1,5 @@
+## About me
+
 <!-- For getting emoji: https://emojipedia.org -->
 
 - 💻 I’m currently working on:
@@ -15,14 +17,18 @@
 - ⚡ Fun fact:
   - A boba a day keeps bugs away.
 
-<details><summary>🧰 Utilities</summary>
+## Useful references
+
+<details>
+  <summary>🧰 Utilities</summary>
 <p>
 
 - [Mirror Action](https://github.com/tianhaoz95/mirror-action): a GitHub action to duplicate files with style.
+- [Pylon](https://github.com/tianhaoz95/pylon): environment for my personal Windows dev machines.
 
 </p>
 </details>
 
-GitHub Stats:
+## GitHub Stats
 
 ![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=tianhaoz95&&show_icons=true&theme=radical)
