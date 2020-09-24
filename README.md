@@ -5,6 +5,8 @@
 - **I’m currently working on** 💻
   - [ApproveMan](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
   - [Check Goup](https://github.com/tianhaoz95/check-group): A GitHub app to group checks into one check based on subprojects.
+  - [Mangekyo](https://github.com/tianhaoz95/mangekyo): Image & video magic tricks.
+  - [Flutter Version](https://github.com/tianhaoz95/fastlane-plugin-flutter_version): Fastlane plugin to retrieve Flutter version information.
 - **Ask me about** 💬 
   - Mobile app development (Flutter) 📱
   - Reinforcement learning 🤖
