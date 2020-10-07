@@ -42,4 +42,5 @@
 
 ## GitHub Stats
 
-![My GitHub Stats](https://github-readme-stats.vercel.app/api?username=tianhaoz95&&show_icons=true&theme=radical)
+![GH stats](https://github-readme-stats.vercel.app/api?username=tianhaoz95&&show_icons=true&theme=radical)
+![GH langs](https://github-readme-stats.vercel.app/api/top-langs/?username=tianhaoz95&layout=compact&theme=radical)
