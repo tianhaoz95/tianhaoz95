@@ -18,6 +18,15 @@
 ## Useful references 📚
 
 <details>
+  <summary><b>Early Stage Ideas</b> 💡</summary>
+<p>
+
+  - [Stock tracker](https://github.com/tianhaoz95/stock-tracker): Python based utility for tracking stock.
+
+</p>
+</details>
+
+<details>
   <summary><b>Utilities</b> 🧰</summary>
 <p>
 
