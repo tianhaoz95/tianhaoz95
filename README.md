@@ -7,6 +7,7 @@
   - [Check Goup](https://github.com/tianhaoz95/check-group): A GitHub app to group checks into one check based on subprojects.
   - [Mangekyo](https://github.com/tianhaoz95/mangekyo): Image & video magic tricks.
   - [Flutter Version](https://github.com/tianhaoz95/fastlane-plugin-flutter_version): Fastlane plugin to retrieve Flutter version information.
+  - [Monorepo Actions](https://github.com/tianhaoz95/monorepo-actions): A collections made for monorepo projects.
 - **Ask me about** 💬 
   - Mobile app development (Flutter) 📱
   - Reinforcement learning 🤖
