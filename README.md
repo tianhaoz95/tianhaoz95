@@ -18,6 +18,8 @@
 
 ## Useful references 📚
 
+* [Pre-market planning doc](https://docs.google.com/spreadsheets/d/1v2jRv8vSpzlP83znnfrh0oYy0iwN2BCQrPTDkN5enxI/edit?usp=sharing)
+
 <details>
   <summary><b>Early Stage Ideas</b> 💡</summary>
 <p>
