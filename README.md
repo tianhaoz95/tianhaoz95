@@ -50,8 +50,3 @@
 
 </p>
 </details>
-
-## GitHub Stats
-
-![GH stats](https://github-readme-stats.vercel.app/api?username=tianhaoz95&&show_icons=true)
-![GH langs](https://github-readme-stats.vercel.app/api/top-langs/?username=tianhaoz95&layout=compact)
