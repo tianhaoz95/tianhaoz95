@@ -18,7 +18,8 @@
 
 ## Useful references 📚
 
-* [Pre-market planning doc](https://docs.google.com/spreadsheets/d/1v2jRv8vSpzlP83znnfrh0oYy0iwN2BCQrPTDkN5enxI/edit?usp=sharing)
+[![tianhaoz95 actions org avatar](https://avatars.githubusercontent.com/u/83519223?s=60&v=4)](https://github.com/tianhaoz95-actions)
+[![wowlink org avatar](https://avatars.githubusercontent.com/u/81609382?s=60&v=4)](https://github.com/wowlink)
 
 <details>
   <summary><b>Early Stage Ideas</b> 💡</summary>
