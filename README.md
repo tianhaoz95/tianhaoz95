@@ -18,8 +18,15 @@
 
 ## Useful references 📚
 
+<details>
+  <summary><b>Organizations</b> 🏅</summary>
+<p>
+
 [![tianhaoz95 actions org avatar](https://avatars.githubusercontent.com/u/83519223?s=60&v=4)](https://github.com/tianhaoz95-actions)
 [![wowlink org avatar](https://avatars.githubusercontent.com/u/81609382?s=60&v=4)](https://github.com/wowlink)
+
+</p>
+</details>
 
 <details>
   <summary><b>Early Stage Ideas</b> 💡</summary>
