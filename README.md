@@ -38,6 +38,7 @@
 <p>
 
 - [Pylon](https://github.com/tianhaoz95/pylon) 💎 💎 💎 : environment for my personal Windows dev machines.
+- [WOW Profile](https://github.com/tianhaoz95/wow-profile): my personal wow link mapping.
 
 </p>
 </details>
