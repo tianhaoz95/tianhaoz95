@@ -28,25 +28,11 @@
 </details>
 
 <details>
-  <summary><b>Early Stage Ideas</b> 💡</summary>
-<p>
-
-</p>
-</details>
-
-<details>
   <summary><b>Utilities</b> 🧰</summary>
 <p>
 
 - [Pylon](https://github.com/tianhaoz95/pylon) 💎 💎 💎 : environment for my personal Windows dev machines.
 - [WOW Profile](https://github.com/tianhaoz95/wow-profile): my personal wow link mapping.
-
-</p>
-</details>
-
-<details>
-  <summary><b>Icebox</b> ❄️</summary>
-<p>
 
 </p>
 </details>
