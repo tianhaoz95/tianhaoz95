@@ -10,7 +10,8 @@
   - Mobile app development (Flutter) 📱
   - Reinforcement learning 🤖
 - **How to reach me** 📫
-  - Email me at jacksonzhou666@gmail.com
+  - Email: jacksonzhou666@gmail.com
+  - Medium: https://medium.com/@tianhaozhou
 - **Fun fact** ⚡
   - A boba a day keeps bugs away.
 
