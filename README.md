@@ -1,6 +1,7 @@
 ## About me 👋
 
 [![Twitter](https://img.shields.io/twitter/follow/TheSWE2?label=Follow)](https://twitter.com/TheSWE2)
+[![GitHub](https://img.shields.io/github/follow/tianhaoz95?label=Follow)](https://github.com/tianhaoz95)
 
 - **I’m currently working on** 💻
   - [ApproveMan](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
