@@ -1,7 +1,9 @@
 ## About me 👋
 
 [![Twitter](https://img.shields.io/twitter/follow/TheSWE2?label=Follow)](https://twitter.com/TheSWE2)
-[![GitHub](https://img.shields.io/github/followers/tianhaoz95?label=Follow)](https://github.com/tianhaoz95)
+[![YouTube](https://img.shields.io/youtube/channel/subscribers/UCY13XGU7-3mYz2n1NzV4oGw?label=YT&style=social)](https://www.youtube.com/channel/UCY13XGU7-3mYz2n1NzV4oGw)
+[![Reddit](https://img.shields.io/reddit/user-karma/combined/jacksonz666?label=reddit&style=social)](https://www.reddit.com/user/jacksonz666/)
+[![Twitch](https://img.shields.io/twitch/status/jacksonzhou666?style=social)](https://www.twitch.tv/jacksonzhou666)
 
 - **I’m currently working on** 💻
   - [ApproveMan](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
