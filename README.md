@@ -1,5 +1,10 @@
 ## About me 👋
 
+<!--
+  For more details on how to add more badges, check the documentation at
+  https://shields.io (or the repository at https://github.com/badges/shields).
+-->
+
 [![Medium](https://img.shields.io/badge/Medium-black?logo=medium&style=social)](https://medium.com/@tianhaozhou)
 [![Email](https://img.shields.io/badge/Email%20Me-white?logo=gmail&style=social)](jacksonzhou666@gmail.com)
 [![Twitter](https://img.shields.io/twitter/follow/TheSWE2?label=Follow)](https://twitter.com/TheSWE2)
