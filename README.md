@@ -22,7 +22,7 @@
 - **Fun fact** ⚡
   - A boba a day keeps bugs away.
 
-## Useful references 📚
+## Quick references 📚
 
 <details>
   <summary><b>Organizations</b> 🏅</summary>
