@@ -13,10 +13,10 @@
 [![Twitch](https://img.shields.io/twitch/status/jacksonzhou666?style=social)](https://www.twitch.tv/jacksonzhou666)
 
 - **I’m currently working on** 💻
-  - [ApproveMan](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
-  - [Check Goup](https://github.com/tianhaoz95/check-group): A GitHub app to group checks into one check based on subprojects.
   - [Flutter Version](https://github.com/tianhaoz95/fastlane-plugin-flutter_version): Fastlane plugin to retrieve Flutter version information.
-- **Ask me about** 💬 
+  - [ApproveMan (discontinued)](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
+  - [Check Goup (discontinued)](https://github.com/tianhaoz95/check-group): A GitHub app to group checks into one check based on subprojects.
+- **Ask me about** 💬
   - Mobile app development (Flutter) 📱
   - Reinforcement learning 🤖
 - **Fun fact** ⚡
