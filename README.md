@@ -24,6 +24,8 @@
 
 ## Quick references 📚
 
+[Chrome OS Linux app installation](https://gist.github.com/tianhaoz95/622da8e876bcf3b80da01728a678ddaf)
+
 <details>
   <summary><b>Organizations</b> 🏅</summary>
 <p>
