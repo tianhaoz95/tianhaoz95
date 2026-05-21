@@ -12,37 +12,8 @@
 [![Reddit](https://img.shields.io/reddit/user-karma/combined/jacksonz666?label=reddit&style=social)](https://www.reddit.com/user/jacksonz666/)
 [![Twitch](https://img.shields.io/twitch/status/jacksonzhou666?style=social)](https://www.twitch.tv/jacksonzhou666)
 
-- **I’m currently working on** 💻
-  - [Flutter Version](https://github.com/tianhaoz95/fastlane-plugin-flutter_version): Fastlane plugin to retrieve Flutter version information.
-  - [ApproveMan (discontinued)](https://github.com/tianhaoz95/approveman): A GitHub app to help approve PR that only modify things in safe locations.
-  - [Check Goup (discontinued)](https://github.com/tianhaoz95/check-group): A GitHub app to group checks into one check based on subprojects.
 - **Ask me about** 💬
   - Mobile app development (Flutter) 📱
   - Reinforcement learning 🤖
 - **Fun fact** ⚡
   - A boba a day keeps bugs away.
-
-## Quick references 📚
-
-[Chrome OS Linux app installation](https://gist.github.com/tianhaoz95/622da8e876bcf3b80da01728a678ddaf)
-
-<details>
-  <summary><b>Organizations</b> 🏅</summary>
-<p>
-
-[![tianhaoz95 actions org avatar](https://avatars.githubusercontent.com/u/83519223?s=60&v=4)](https://github.com/tianhaoz95-actions)
-[![notebook avatar](https://avatars.githubusercontent.com/u/83990800?s=60&v=4)](https://github.com/tianhaoz95-notebooks)
-[![wowlink org avatar](https://avatars.githubusercontent.com/u/81609382?s=60&v=4)](https://github.com/wowlink)
-
-</p>
-</details>
-
-<details>
-  <summary><b>Utilities</b> 🧰</summary>
-<p>
-
-- [Pylon](https://github.com/tianhaoz95/pylon) 💎 💎 💎 : environment for my personal Windows dev machines.
-- [WOW Profile](https://github.com/tianhaoz95/wow-profile): my personal wow link mapping.
-
-</p>
-</details>
