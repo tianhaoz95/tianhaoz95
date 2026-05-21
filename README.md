@@ -13,7 +13,7 @@
 [![Twitch](https://img.shields.io/twitch/status/jacksonzhou666?style=social)](https://www.twitch.tv/jacksonzhou666)
 
 - **Ask me about** 💬
-  - Mobile app development (Flutter) 📱
-  - Reinforcement learning 🤖
+  - Inference engine 🚀
+  - RLVR 🤖
 - **Fun fact** ⚡
   - A boba a day keeps bugs away.
