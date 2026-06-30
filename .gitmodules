@@ -1,0 +1,6 @@
+[submodule "projects/zerog-tools"]
+	path = projects/zerog-tools
+	url = git@github.com:tianhaoz95/zerog-tools.git
+[submodule "projects/meowtrix"]
+	path = projects/meowtrix
+	url = git@github.com:tianhaoz95/meowtrix.git
