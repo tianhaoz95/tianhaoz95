@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="880" height="390" viewBox="0 0 880 390">
   <defs>
     <style>
-      .bg { fill: #0b0d12; }
-      .card { fill: #12151c; stroke: #232733; stroke-width: 1; }
-      .title { font: 600 20px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #e6e8ef; }
-      .desc { font: 400 13px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #9aa3b2; }
-      .tag { font: 500 11px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #7c9bff; }
-      .tagbg { fill: rgba(124,155,255,0.12); stroke: rgba(124,155,255,0.35); stroke-width: 1; }
-      .heading { font: 600 16px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #9aa3b2; }
+      .bg { fill: #f6f7f9; }
+      .card { fill: #ffffff; stroke: #e3e6ec; stroke-width: 1; }
+      .title { font: 600 20px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #1a1d24; }
+      .desc { font: 400 13px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #5b6472; }
+      .tag { font: 500 11px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #3b5bdb; }
+      .tagbg { fill: rgba(59,91,219,0.08); stroke: rgba(59,91,219,0.25); stroke-width: 1; }
+      .heading { font: 600 16px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #5b6472; }
     </style>
   </defs>
 

@@ -135,10 +135,16 @@ card its own track); GSAP timeline built paused and registered on
 `window.__timelines["main"]`.
 
 **Fixed canvas**: 420×240 regardless of project count — the whole point is
-a small, constant footprint. Dark theme only (no `prefers-color-scheme`
-support — it's a static GIF), reusing `index.html`'s `:root` dark tokens:
-`--bg:#0b0d12 --card-bg:#12151c --border:#232733 --text:#e6e8ef
---muted:#9aa3b2 --accent:#7c9bff`.
+a small, constant footprint. Light theme only (no `prefers-color-scheme`
+support — it's a static GIF; `index.html` itself still auto-switches),
+reusing `index.html`'s `:root` light-mode tokens (the `@media
+(prefers-color-scheme: light)` block): `--bg:#f6f7f9 --card-bg:#ffffff
+--border:#e3e6ec --text:#1a1d24 --muted:#5b6472 --accent:#3b5bdb
+--tag-bg:rgba(59,91,219,0.08) --tag-border:rgba(59,91,219,0.25)`.
+`pages/banner.svg` uses the same light tokens for consistency — both
+static assets should always use the same palette as each other (currently
+light), even though `index.html` itself adapts to the visitor's system
+theme.
 
 **Timing — generalizes to N projects.** `HOLD = 1.8s`, `TRANS = 0.4s`,
 `SEG = HOLD + TRANS = 2.2s`. Total duration `D = N * SEG`. For very large N
@@ -165,8 +171,8 @@ transition `i -> i+1` (i from 0 to N-2), at `t = i*SEG + HOLD`:
 ```js
 tl.to(`#card${i}`,   { opacity: 0, scale: 0.96, y: -8, duration: TRANS, ease: "power2.in" }, t);
 tl.to(`#card${i+1}`, { opacity: 1, scale: 1,    y: 0,  duration: TRANS, ease: "power2.out" }, t);
-tl.to(`#dot${i}`,    { backgroundColor: "#232733", scale: 1,   duration: TRANS }, t);
-tl.to(`#dot${i+1}`,  { backgroundColor: "#7c9bff", scale: 1.3, duration: TRANS }, t);
+tl.to(`#dot${i}`,    { backgroundColor: "#e3e6ec", scale: 1,   duration: TRANS }, t);
+tl.to(`#dot${i+1}`,  { backgroundColor: "#3b5bdb", scale: 1.3, duration: TRANS }, t);
 ```
 
 **Card markup** (per project, inside its `.clip`): a small accent top-bar,
