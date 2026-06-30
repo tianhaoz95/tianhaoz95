@@ -20,4 +20,4 @@
 
 ## Projects 🛠️
 
-[![Projects](https://tianhaoz95.github.io/tianhaoz95/banner.svg)](https://tianhaoz95.github.io/tianhaoz95/)
+[![Projects](https://tianhaoz95.github.io/tianhaoz95/card-cycle.gif)](https://tianhaoz95.github.io/tianhaoz95/)

@@ -126,12 +126,27 @@
       text-align: center;
     }
     footer a { color: var(--accent); }
+    .hero {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+    .hero img {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <h1>Projects</h1>
     <p class="subtitle">A few things I'm building.</p>
+
+    <div class="hero">
+      <img src="card-cycle.gif" alt="Project cards cycling through Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
+    </div>
 
     <div class="grid">
       <a class="card" href="https://github.com/tianhaoz95/meowtrix" target="_blank" rel="noopener">
