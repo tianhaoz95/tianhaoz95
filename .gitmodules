@@ -4,3 +4,6 @@
 [submodule "projects/meowtrix"]
 	path = projects/meowtrix
 	url = git@github.com:tianhaoz95/meowtrix.git
+[submodule "projects/study"]
+	path = projects/study
+	url = git@github.com:tianhaoz95/study.git
