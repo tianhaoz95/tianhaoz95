@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tianhao Zhou — Projects</title>
+  <meta name="description" content="A gallery of projects by Tianhao Zhou (tianhaoz95)." />
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --card-bg: #12151c;
+      --border: #232733;
+      --text: #e6e8ef;
+      --muted: #9aa3b2;
+      --accent: #7c9bff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 48px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 4px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 36px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .card-media {
+      height: 160px;
+      background: #05060a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-media.icon-only img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+    }
+    .card-body {
+      padding: 18px 20px 20px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-desc {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin: 0 0 14px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 0.72rem;
+      color: var(--accent);
+      background: rgba(124, 155, 255, 0.12);
+      border: 1px solid rgba(124, 155, 255, 0.25);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Projects</h1>
+    <p class="subtitle">A few things I'm building.</p>
+
+    <div class="grid">
+      <a class="card" href="https://github.com/tianhaoz95/meowtrix" target="_blank" rel="noopener">
+        <div class="card-media">
+          <img src="https://tianhaoz95.github.io/meowtrix/assets/screenshot-dark.png" alt="Meowtrix screenshot" loading="lazy" />
+        </div>
+        <div class="card-body">
+          <p class="card-title">🐾 Meowtrix</p>
+          <p class="card-desc">Remote vibe engineering tool — a browser-based workspace with tiling split panes, each pane holding a PTY-backed terminal or an embedded browser. Shells live on the server, so refreshes and device switches don't kill your work.</p>
+          <div class="tags">
+            <span class="tag">terminal</span>
+            <span class="tag">remote dev</span>
+            <span class="tag">Node.js</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="card" href="https://github.com/tianhaoz95/zerog-tools" target="_blank" rel="noopener">
+        <div class="card-media icon-only">
+          <img src="https://zerog-toolbox.web.app/favicon.svg" alt="ZeroG Toolbox icon" loading="lazy" />
+        </div>
+        <div class="card-body">
+          <p class="card-title">⚡ ZeroG Toolbox</p>
+          <p class="card-desc">35+ free, privacy-first utilities that run 100% in your browser — AI passport photos, audio transcription, OCR, file encryption, and more. No uploads, no servers, fully private.</p>
+          <div class="tags">
+            <span class="tag">browser AI</span>
+            <span class="tag">privacy-first</span>
+            <span class="tag">Vite</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <footer>
+      <p>Built by <a href="https://github.com/tianhaoz95">@tianhaoz95</a></p>
+    </footer>
+  </div>
+</body>
+</html>

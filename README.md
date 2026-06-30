@@ -17,3 +17,7 @@
   - RLVR 🤖
 - **Fun fact** ⚡
   - A boba a day keeps bugs away.
+
+## Projects 🛠️
+
+[![Projects](https://tianhaoz95.github.io/tianhaoz95/banner.svg)](https://tianhaoz95.github.io/tianhaoz95/)
