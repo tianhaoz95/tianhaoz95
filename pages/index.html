@@ -128,14 +128,30 @@
     footer a { color: var(--accent); }
     .hero {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
       margin-bottom: 36px;
     }
+    .hero-label {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
     .hero img {
-      width: 100%;
-      max-width: 420px;
       border-radius: 16px;
       border: 1px solid var(--border);
+    }
+    .hero-banner {
+      width: 100%;
+      max-width: 600px;
+    }
+    .hero-gif {
+      width: 100%;
+      max-width: 420px;
     }
   </style>
 </head>
@@ -145,7 +161,9 @@
     <p class="subtitle">A few things I'm building.</p>
 
     <div class="hero">
-      <img src="card-cycle.gif" alt="Project cards cycling through Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
+      <p class="hero-label">Highlighted Projects</p>
+      <img class="hero-banner" src="banner.svg" alt="Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
+      <img class="hero-gif" src="card-cycle.gif" alt="Project cards cycling through Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
     </div>
 
     <div class="grid">
