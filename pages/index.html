@@ -14,6 +14,22 @@
       --text: #e6e8ef;
       --muted: #9aa3b2;
       --accent: #7c9bff;
+      --media-bg: #05060a;
+      --tag-bg: rgba(124, 155, 255, 0.12);
+      --tag-border: rgba(124, 155, 255, 0.25);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7f9;
+        --card-bg: #ffffff;
+        --border: #e3e6ec;
+        --text: #1a1d24;
+        --muted: #5b6472;
+        --accent: #3b5bdb;
+        --media-bg: #eef0f4;
+        --tag-bg: rgba(59, 91, 219, 0.08);
+        --tag-border: rgba(59, 91, 219, 0.25);
+      }
     }
     * { box-sizing: border-box; }
     body {
@@ -57,7 +73,7 @@
     }
     .card-media {
       height: 160px;
-      background: #05060a;
+      background: var(--media-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -98,8 +114,8 @@
     .tag {
       font-size: 0.72rem;
       color: var(--accent);
-      background: rgba(124, 155, 255, 0.12);
-      border: 1px solid rgba(124, 155, 255, 0.25);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
       padding: 2px 8px;
       border-radius: 999px;
     }
