@@ -5,7 +5,6 @@ export function renderAbout(profile: Profile): HTMLElement {
   section.id = 'about';
   section.className = 'hero-section';
   section.innerHTML = `
-    <div class="hero-canvas-host" aria-hidden="true"></div>
     <div class="hero-glow hero-glow-1" aria-hidden="true"></div>
     <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
     <div class="about">

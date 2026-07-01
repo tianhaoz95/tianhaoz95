@@ -8,7 +8,7 @@ import { renderContact } from './sections/contact';
 import { initChatSidebar } from './chat/session';
 import { initScrollSpy } from './scrollSpy';
 import { initScrollReveal } from './scrollReveal';
-import { initHeroCanvas } from './heroCanvas';
+import { initBackgroundCanvas } from './bgCanvas';
 
 function renderFooter(): HTMLElement {
   const footer = document.createElement('footer');
@@ -32,8 +32,7 @@ function main() {
 
   initScrollSpy();
   initScrollReveal();
-  const heroCanvasHost = page.querySelector<HTMLElement>('.hero-canvas-host');
-  if (heroCanvasHost) initHeroCanvas(heroCanvasHost);
+  initBackgroundCanvas();
 
   // Wires up the chat FAB's click listener only — no model download happens
   // until the user actually opens the panel.

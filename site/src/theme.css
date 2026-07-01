@@ -46,6 +46,20 @@ body {
   color: var(--text);
   font-family: var(--font-body);
 }
+
+/* site-wide animated background, sits behind every section */
+.bg-canvas-host {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.bg-canvas-host canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
 .page {
   max-width: 880px;
   margin: 0 auto;
@@ -203,19 +217,6 @@ h3 {
   bottom: -200px;
   right: -140px;
   background: var(--accent-2);
-}
-.hero-canvas-host {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.hero-canvas-host canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  opacity: 0.6;
 }
 .about {
   position: relative;
