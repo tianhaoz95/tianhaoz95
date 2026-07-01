@@ -29,10 +29,6 @@ export interface Profile {
   skillGroups: SkillGroup[];
   projects: Project[];
   contactLinks: ContactLink[];
-  hero: {
-    banner: { light: string; dark: string; alt: string };
-    cardCycle: { light: string; dark: string; alt: string; width: number; height: number };
-  };
 }
 
 export const profile: Profile = {
@@ -120,18 +116,4 @@ export const profile: Profile = {
     { icon: '👽', label: 'Reddit', href: 'https://www.reddit.com/user/jacksonz666/' },
     { icon: '🎮', label: 'Twitch', href: 'https://www.twitch.tv/jacksonzhou666' },
   ],
-  hero: {
-    banner: {
-      light: 'banner.svg',
-      dark: 'banner-dark.svg',
-      alt: 'Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai',
-    },
-    cardCycle: {
-      light: 'card-cycle.gif',
-      dark: 'card-cycle-dark.gif',
-      alt: 'Project cards for Meowtrix, ZeroG Toolbox, and Catpuccino.ai shuffling side by side',
-      width: 880,
-      height: 240,
-    },
-  },
 };

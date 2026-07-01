@@ -4,7 +4,12 @@ export function renderProjects(profile: Profile): HTMLElement {
   const section = document.createElement('section');
   section.id = 'projects';
 
-  const { cardCycle } = profile.hero;
+  // Live, data-driven strip instead of a pre-rendered image: it reflects
+  // profile.projects directly, so it never goes stale and never needs a
+  // light/dark variant baked in separately.
+  const chipsHtml = profile.projects
+    .map((project) => `<span class="marquee-chip">${project.emoji} ${project.title}</span>`)
+    .join('\n');
 
   const cardsHtml = profile.projects
     .map((project) => {
@@ -31,11 +36,11 @@ export function renderProjects(profile: Profile): HTMLElement {
     <p class="section-label">Projects</p>
     <h2>A few things I'm building</h2>
 
-    <div class="hero">
-      <picture>
-        <source srcset="${cardCycle.dark}" media="(prefers-color-scheme: dark)" />
-        <img class="hero-gif" src="${cardCycle.light}" alt="${cardCycle.alt}" loading="lazy" width="${cardCycle.width}" height="${cardCycle.height}" />
-      </picture>
+    <div class="project-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        ${chipsHtml}
+        ${chipsHtml}
+      </div>
     </div>
 
     <div class="grid">

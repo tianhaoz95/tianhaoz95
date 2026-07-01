@@ -204,6 +204,19 @@ h3 {
   right: -140px;
   background: var(--accent-2);
 }
+.hero-canvas-host {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-canvas-host canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
 .about {
   position: relative;
   z-index: 1;
@@ -424,22 +437,46 @@ h3 {
 .card:hover .card-link-arrow {
   transform: translateX(4px);
 }
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+.project-marquee {
+  position: relative;
+  overflow: hidden;
   margin-bottom: 36px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
-.hero img {
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 24px var(--shadow);
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 14px;
+  animation: marquee-scroll 24s linear infinite;
 }
-.hero-banner,
-.hero-gif {
-  width: 100%;
-  max-width: 640px;
+.project-marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 999px;
+  color: var(--text);
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
 }
 
 /* contact */
