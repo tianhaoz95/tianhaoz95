@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tianhao Zhou — Projects</title>
-  <meta name="description" content="A gallery of projects by Tianhao Zhou (tianhaoz95)." />
+  <title>Tianhao Zhou — Profile</title>
+  <meta name="description" content="Tianhao Zhou (tianhaoz95) — developer profile: about, skills, projects, and contact." />
   <link rel="icon" href="data:," />
   <style>
     :root {
@@ -17,6 +17,7 @@
       --media-bg: #05060a;
       --tag-bg: rgba(124, 155, 255, 0.12);
       --tag-border: rgba(124, 155, 255, 0.25);
+      --nav-bg: rgba(11, 13, 18, 0.85);
     }
     @media (prefers-color-scheme: light) {
       :root {
@@ -29,12 +30,13 @@
         --media-bg: #eef0f4;
         --tag-bg: rgba(59, 91, 219, 0.08);
         --tag-border: rgba(59, 91, 219, 0.25);
+        --nav-bg: rgba(246, 247, 249, 0.85);
       }
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      padding: 48px 24px;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -42,15 +44,129 @@
     .page {
       max-width: 880px;
       margin: 0 auto;
+      padding: 0 24px 48px;
+    }
+    section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    section:last-of-type {
+      border-bottom: none;
     }
     h1 {
       font-size: 1.6rem;
       margin: 0 0 4px;
     }
+    h2 {
+      font-size: 1.3rem;
+      margin: 0 0 8px;
+    }
     .subtitle {
       color: var(--muted);
       margin: 0 0 36px;
     }
+    .section-label {
+      margin: 0 0 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* nav */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand {
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .site-nav .links {
+      display: flex;
+      gap: 20px;
+    }
+    .site-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .site-nav a:hover {
+      color: var(--accent);
+    }
+
+    /* about */
+    .about {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .avatar {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .about-body p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 8px 0 16px;
+    }
+    .handle {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      font-size: 0.8rem;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    /* skills */
+    .skill-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .skill-group h3 {
+      font-size: 0.95rem;
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 0.72rem;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    /* projects */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -106,26 +222,6 @@
       line-height: 1.5;
       margin: 0 0 14px;
     }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .tag {
-      font-size: 0.72rem;
-      color: var(--accent);
-      background: var(--tag-bg);
-      border: 1px solid var(--tag-border);
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-    footer {
-      margin-top: 40px;
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-align: center;
-    }
-    footer a { color: var(--accent); }
     .hero {
       display: flex;
       flex-direction: column;
@@ -133,85 +229,198 @@
       gap: 14px;
       margin-bottom: 36px;
     }
-    .hero-label {
-      margin: 0;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
     .hero img {
       border-radius: 16px;
       border: 1px solid var(--border);
     }
-    .hero-banner {
-      width: 100%;
-      max-width: 600px;
-    }
+    .hero-banner,
     .hero-gif {
       width: 100%;
       max-width: 600px;
     }
+
+    /* contact */
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    footer {
+      padding: 32px 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    footer a { color: var(--accent); }
+
+    @media (max-width: 560px) {
+      .about {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <h1>Projects</h1>
-    <p class="subtitle">A few things I'm building.</p>
-
-    <div class="hero">
-      <p class="hero-label">Highlighted Projects</p>
-      <img class="hero-banner" src="banner.svg" alt="Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
-      <img class="hero-gif" src="card-cycle.gif" alt="Project cards for Meowtrix, ZeroG Toolbox, and Catpuccino.ai shuffling side by side" loading="lazy" />
+  <nav class="site-nav">
+    <a class="brand" href="#about">Tianhao Zhou</a>
+    <div class="links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
     </div>
+  </nav>
 
-    <div class="grid">
-      <a class="card" href="https://github.com/tianhaoz95/meowtrix" target="_blank" rel="noopener">
-        <div class="card-media">
-          <img src="https://tianhaoz95.github.io/meowtrix/assets/screenshot-dark.png" alt="Meowtrix screenshot" loading="lazy" />
-        </div>
-        <div class="card-body">
-          <p class="card-title">🐾 Meowtrix</p>
-          <p class="card-desc">Remote vibe engineering tool — a browser-based workspace with tiling split panes, each pane holding a PTY-backed terminal or an embedded browser. Shells live on the server, so refreshes and device switches don't kill your work.</p>
-          <div class="tags">
-            <span class="tag">terminal</span>
-            <span class="tag">remote dev</span>
-            <span class="tag">Node.js</span>
+  <div class="page">
+    <section id="about">
+      <p class="section-label">About</p>
+      <div class="about">
+        <img class="avatar" src="https://github.com/tianhaoz95.png" alt="Tianhao Zhou's avatar" loading="lazy" />
+        <div class="about-body">
+          <h1>Tianhao Zhou</h1>
+          <p class="handle">@tianhaoz95</p>
+          <p>Building tools across terminal &amp; dev tooling, browser AI, and AI/ML research — see the projects below.</p>
+          <div class="pills">
+            <span class="pill">🚀 Ask me about: inference engines</span>
+            <span class="pill">🤖 Ask me about: RLVR</span>
+            <span class="pill">⚡ A boba a day keeps bugs away</span>
           </div>
         </div>
-      </a>
+      </div>
+    </section>
 
-      <a class="card" href="https://github.com/tianhaoz95/zerog-tools" target="_blank" rel="noopener">
-        <div class="card-media icon-only">
-          <img src="https://zerog-toolbox.web.app/favicon.svg" alt="ZeroG Toolbox icon" loading="lazy" />
-        </div>
-        <div class="card-body">
-          <p class="card-title">⚡ ZeroG Toolbox</p>
-          <p class="card-desc">35+ free, privacy-first utilities that run 100% in your browser — AI passport photos, audio transcription, OCR, file encryption, and more. No uploads, no servers, fully private.</p>
+    <section id="skills">
+      <p class="section-label">Skills</p>
+      <h2>Tech I work with</h2>
+      <p class="subtitle">Pulled from the stacks behind the projects below, grouped by area.</p>
+      <div class="skill-groups">
+        <div class="skill-group">
+          <h3>Systems &amp; backend</h3>
           <div class="tags">
-            <span class="tag">browser AI</span>
-            <span class="tag">privacy-first</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">Express</span>
+            <span class="tag">WebSockets</span>
+            <span class="tag">PTY / terminals</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <h3>Browser AI &amp; ML</h3>
+          <div class="tags">
+            <span class="tag">Transformers.js</span>
+            <span class="tag">MediaPipe</span>
+            <span class="tag">Tesseract.js (OCR)</span>
+            <span class="tag">on-device inference</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <h3>Frontend</h3>
+          <div class="tags">
+            <span class="tag">TypeScript</span>
+            <span class="tag">Astro</span>
             <span class="tag">Vite</span>
           </div>
         </div>
-      </a>
-
-      <a class="card" href="https://github.com/tianhaoz95/study" target="_blank" rel="noopener">
-        <div class="card-media icon-only">
-          <img src="https://heji-study.web.app/favicon.svg" alt="Catpuccino.ai icon" loading="lazy" />
-        </div>
-        <div class="card-body">
-          <p class="card-title">📚 Catpuccino.ai</p>
-          <p class="card-desc">A personal AI/ML tech blog — deep dives into frontier research papers and open-source projects, with interactive visualizations and companion apps.</p>
+        <div class="skill-group">
+          <h3>Infra &amp; hosting</h3>
           <div class="tags">
-            <span class="tag">AI/ML research</span>
-            <span class="tag">blog</span>
-            <span class="tag">Astro</span>
+            <span class="tag">Firebase</span>
+            <span class="tag">GitHub Actions</span>
+            <span class="tag">GitHub Pages</span>
           </div>
         </div>
-      </a>
-    </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <p class="section-label">Projects</p>
+      <h2>A few things I'm building</h2>
+
+      <div class="hero">
+        <img class="hero-banner" src="banner.svg" alt="Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
+        <img class="hero-gif" src="card-cycle.gif" alt="Project cards for Meowtrix, ZeroG Toolbox, and Catpuccino.ai shuffling side by side" loading="lazy" />
+      </div>
+
+      <div class="grid">
+        <a class="card" href="https://github.com/tianhaoz95/meowtrix" target="_blank" rel="noopener">
+          <div class="card-media">
+            <img src="https://tianhaoz95.github.io/meowtrix/assets/screenshot-dark.png" alt="Meowtrix screenshot" loading="lazy" />
+          </div>
+          <div class="card-body">
+            <p class="card-title">🐾 Meowtrix</p>
+            <p class="card-desc">Remote vibe engineering tool — a browser-based workspace with tiling split panes, each pane holding a PTY-backed terminal or an embedded browser. Shells live on the server, so refreshes and device switches don't kill your work.</p>
+            <div class="tags">
+              <span class="tag">terminal</span>
+              <span class="tag">remote dev</span>
+              <span class="tag">Node.js</span>
+            </div>
+          </div>
+        </a>
+
+        <a class="card" href="https://github.com/tianhaoz95/zerog-tools" target="_blank" rel="noopener">
+          <div class="card-media icon-only">
+            <img src="https://zerog-toolbox.web.app/favicon.svg" alt="ZeroG Toolbox icon" loading="lazy" />
+          </div>
+          <div class="card-body">
+            <p class="card-title">⚡ ZeroG Toolbox</p>
+            <p class="card-desc">35+ free, privacy-first utilities that run 100% in your browser — AI passport photos, audio transcription, OCR, file encryption, and more. No uploads, no servers, fully private.</p>
+            <div class="tags">
+              <span class="tag">browser AI</span>
+              <span class="tag">privacy-first</span>
+              <span class="tag">Vite</span>
+            </div>
+          </div>
+        </a>
+
+        <a class="card" href="https://github.com/tianhaoz95/study" target="_blank" rel="noopener">
+          <div class="card-media icon-only">
+            <img src="https://heji-study.web.app/favicon.svg" alt="Catpuccino.ai icon" loading="lazy" />
+          </div>
+          <div class="card-body">
+            <p class="card-title">📚 Catpuccino.ai</p>
+            <p class="card-desc">A personal AI/ML tech blog — deep dives into frontier research papers and open-source projects, with interactive visualizations and companion apps.</p>
+            <div class="tags">
+              <span class="tag">AI/ML research</span>
+              <span class="tag">blog</span>
+              <span class="tag">Astro</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section id="contact">
+      <p class="section-label">Contact</p>
+      <h2>Get in touch</h2>
+      <div class="contact-links">
+        <a class="contact-link" href="https://github.com/tianhaoz95" target="_blank" rel="noopener">GitHub</a>
+        <a class="contact-link" href="mailto:jacksonzhou666@gmail.com">Email</a>
+        <a class="contact-link" href="https://twitter.com/TheSWE2" target="_blank" rel="noopener">Twitter</a>
+        <a class="contact-link" href="https://medium.com/@tianhaozhou" target="_blank" rel="noopener">Medium</a>
+        <a class="contact-link" href="https://www.youtube.com/channel/UCY13XGU7-3mYz2n1NzV4oGw" target="_blank" rel="noopener">YouTube</a>
+        <a class="contact-link" href="https://www.reddit.com/user/jacksonz666/" target="_blank" rel="noopener">Reddit</a>
+        <a class="contact-link" href="https://www.twitch.tv/jacksonzhou666" target="_blank" rel="noopener">Twitch</a>
+      </div>
+    </section>
 
     <footer>
       <p>Built by <a href="https://github.com/tianhaoz95">@tianhaoz95</a></p>

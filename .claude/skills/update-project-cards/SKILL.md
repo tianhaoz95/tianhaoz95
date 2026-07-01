@@ -27,10 +27,16 @@ Three artifacts hold the actual content and must stay in sync:
   grid that keeps getting taller). Generated with the `hyperframes` CLI (a
   `motion-graphics`-style composition) — see "Regenerating the GIF" below.
 
-`README.md` embeds `pages/card-cycle.gif` directly (not `banner.svg`) as a
-clickable image linking to the live Pages site — GitHub strips
-`<iframe>`/live HTML from profile READMEs, so an animated GIF is the
-richest format that still renders there.
+`README.md` embeds `pages/card-cycle.gif` (not `banner.svg`) via a
+**relative path** (`![Projects](pages/card-cycle.gif)`), clicking through
+to the live Pages site — GitHub strips `<iframe>`/live HTML from profile
+READMEs, so an animated GIF is the richest format that still renders
+there. Keep the `src` relative rather than the deployed
+`https://tianhaoz95.github.io/tianhaoz95/...` URL: a relative path
+resolves to the committed file the instant it's pushed, with no
+dependency on the Pages deploy workflow finishing first — the link
+*destination* (which does point at the deployed site) is unaffected
+either way.
 
 Projects live as git submodules under `./projects/*` (declared in
 `.gitmodules`).

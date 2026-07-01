@@ -1,5 +1,7 @@
 ## About me 👋
 
+**→ [View my full profile](https://tianhaoz95.github.io/tianhaoz95/)** — bio, skills, and the full project gallery.
+
 <!--
   For more details on how to add more badges, check the documentation at
   https://shields.io (or the repository at https://github.com/badges/shields).
@@ -20,4 +22,4 @@
 
 ## Projects 🛠️
 
-[![Projects](https://tianhaoz95.github.io/tianhaoz95/card-cycle.gif)](https://tianhaoz95.github.io/tianhaoz95/)
+[![Projects](pages/card-cycle.gif)](https://tianhaoz95.github.io/tianhaoz95/)
