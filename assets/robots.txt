@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tianhaoz95.github.io/tianhaoz95/sitemap.xml
