@@ -186,17 +186,30 @@ async function handleSend(ui: ChatUIController, text: string, imageFile: File | 
 
 export function initChatSidebar(): void {
   const ui: ChatUIController = initChatUI({
-    onOpen: () => {
-      ensureTextWorker(ui).catch((err) => {
-        console.error('Failed to load assistant model:', err);
-        ui.appendSystemNote(
-          "Couldn't load the assistant model — this can happen on browsers without WebGPU support " +
-            'or with limited available memory. Try a recent Chrome/Edge, close other tabs, and reload.',
-        );
-      });
-    },
     onSend: (text, imageFile) => {
       void handleSend(ui, text, imageFile);
     },
   });
+
+  // Start pulling the text model down immediately rather than waiting for
+  // the user to open the panel — the panel is visible by default now, so
+  // there's no "first open" moment to defer to, and starting the download
+  // at page load hides its latency behind whatever else the visitor reads
+  // first. The vision model stays lazy: it's only needed if/when an image
+  // gets attached.
+  ui.setBusy(true);
+  ui.setInputPlaceholder('Model is loading…');
+  ensureTextWorker(ui)
+    .then(() => {
+      ui.setBusy(false);
+      ui.setInputPlaceholder('');
+    })
+    .catch((err) => {
+      console.error('Failed to load assistant model:', err);
+      ui.setInputPlaceholder("Model failed to load — see the note above.");
+      ui.appendSystemNote(
+        "Couldn't load the assistant model — this can happen on browsers without WebGPU support " +
+          'or with limited available memory. Try a recent Chrome/Edge, close other tabs, and reload.',
+      );
+    });
 }

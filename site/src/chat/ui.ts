@@ -2,7 +2,6 @@ import './chat.css';
 
 export interface ChatUIHandlers {
   onSend: (text: string, imageFile: File | null) => void;
-  onOpen: () => void;
 }
 
 export interface StreamHandle {
@@ -21,23 +20,29 @@ export interface ChatUIController {
     label?: string,
   ) => void;
   setBusy: (busy: boolean) => void;
+  setInputPlaceholder: (text: string) => void;
   clearImagePreview: () => void;
   getPendingImage: () => File | null;
 }
 
+const DEFAULT_PLACEHOLDER = 'Ask about skills, projects, or contact info…';
+
 export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   let pendingImage: File | null = null;
-  let hasOpenedOnce = false;
 
   const fabWrap = document.createElement('div');
   fabWrap.className = 'chat-fab-wrap';
   fabWrap.innerHTML = `
-    <span class="chat-fab-tooltip">Ask about this profile</span>
-    <button class="chat-fab" aria-label="Open AI assistant chat">💬</button>
+    <span class="chat-fab-tooltip">Toggle AI assistant chat</span>
+    <button class="chat-fab" aria-label="Toggle AI assistant chat">💬</button>
   `;
   document.body.appendChild(fabWrap);
   const fab = fabWrap.querySelector('.chat-fab') as HTMLButtonElement;
 
+  // Open by default — this is the site's AI assistant, not an opt-in widget,
+  // so it should be visible right away and dismissible rather than hidden
+  // behind a click. (Actual opening happens via setOpen(true) below, once
+  // the FAB it needs to hide also exists.)
   const panel = document.createElement('aside');
   panel.className = 'chat-panel';
   panel.innerHTML = `
@@ -80,18 +85,23 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   const imagePreviewName = panel.querySelector('.chat-image-name') as HTMLSpanElement;
   const imageRemoveBtn = panel.querySelector('.chat-image-remove') as HTMLButtonElement;
 
-  function openPanel() {
-    panel.classList.add('open');
-    if (!hasOpenedOnce) {
-      hasOpenedOnce = true;
-      handlers.onOpen();
-    }
+  // The FAB sits in the same corner the panel floats in, so once the panel
+  // is open it visually (and hit-test-wise) covers the FAB — hide it while
+  // open rather than leaving a dead button underneath that swallows clicks
+  // meant for the panel.
+  function setOpen(open: boolean) {
+    panel.classList.toggle('open', open);
+    fabWrap.classList.toggle('chat-fab-wrap--hidden', open);
+  }
+  function togglePanel() {
+    setOpen(!panel.classList.contains('open'));
   }
   function closePanel() {
-    panel.classList.remove('open');
+    setOpen(false);
   }
 
-  fab.addEventListener('click', openPanel);
+  setOpen(true);
+  fab.addEventListener('click', togglePanel);
   closeBtn.addEventListener('click', closePanel);
 
   attachBtn.addEventListener('click', () => fileInput.click());
@@ -188,6 +198,9 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
       sendBtn.disabled = busy;
       attachBtn.disabled = busy;
       textarea.disabled = busy;
+    },
+    setInputPlaceholder(text) {
+      textarea.placeholder = text || DEFAULT_PLACEHOLDER;
     },
     clearImagePreview() {
       pendingImage = null;

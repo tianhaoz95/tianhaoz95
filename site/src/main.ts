@@ -34,8 +34,9 @@ function main() {
   initScrollReveal();
   initBackgroundCanvas();
 
-  // Wires up the chat FAB's click listener only — no model download happens
-  // until the user actually opens the panel.
+  // Chat panel renders open by default and starts pulling the text model
+  // down immediately (see chat/session.ts) rather than waiting on user
+  // interaction.
   initChatSidebar();
 }
 
