@@ -12,7 +12,7 @@ export function renderContact(profile: Profile): HTMLElement {
         .map((link) => {
           const external = link.href.startsWith('http');
           const attrs = external ? ' target="_blank" rel="noopener"' : '';
-          return `<a class="contact-link" href="${link.href}"${attrs}><span class="contact-icon">${link.icon}</span>${link.label}</a>`;
+          return `<a class="contact-link" href="${link.href}"${attrs}><span class="contact-icon">${link.icon}</span><span>${link.label}</span></a>`;
         })
         .join('\n')}
     </div>

@@ -9,11 +9,11 @@ export function renderAbout(profile: Profile): HTMLElement {
     <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
     <div class="about">
       <div class="avatar-wrap">
-        <span class="avatar-ring"></span>
         <img class="avatar" src="${profile.avatarUrl}" alt="${profile.name}'s avatar" loading="lazy" />
+        <span class="avatar-scan" aria-hidden="true"></span>
       </div>
       <div class="about-body">
-        <p class="section-label">About</p>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Developer profile</p>
         <h1>${profile.name}</h1>
         <p class="handle">${profile.handle}</p>
         <p class="bio">${profile.bio}</p>
