@@ -18,13 +18,14 @@ Three artifacts hold the actual content and must stay in sync:
   cards.
 - `pages/banner.svg` — a static two-card-per-row preview of every project
   card, shown in the `.hero` block above the GIF.
-- `pages/card-cycle.gif` — a small (420×240) looping animation that cycles
-  through every project's card one at a time, highlighting the currently
-  shown one (accent top-bar + progress dots). This is what keeps the gallery
-  usable in a small footprint as the project count grows — it's the only
-  artifact that scales by *time* (cycling) rather than *space* (a grid that
-  keeps getting taller). Generated with the `hyperframes` CLI (a `motion-graphics`-style
-  composition) — see "Regenerating the GIF" below.
+- `pages/card-cycle.gif` — a looping animation (880×240 at 3 projects) that
+  shows project cards side by side and periodically shuffles their
+  positions (a seamless cyclic rotation, so the loop point is invisible).
+  This is what keeps the gallery usable in a small footprint as the project
+  count grows — it's the only artifact that scales by *time* (shuffling
+  through more cards than fit on screen at once) rather than *space* (a
+  grid that keeps getting taller). Generated with the `hyperframes` CLI (a
+  `motion-graphics`-style composition) — see "Regenerating the GIF" below.
 
 `README.md` embeds `pages/card-cycle.gif` directly (not `banner.svg`) as a
 clickable image linking to the live Pages site — GitHub strips
@@ -134,65 +135,106 @@ child needs `class="clip"` + `data-start` + `data-duration` +
 card its own track); GSAP timeline built paused and registered on
 `window.__timelines["main"]`.
 
-**Fixed canvas**: 420×240 regardless of project count — the whole point is
-a small, constant footprint. Light theme only (no `prefers-color-scheme`
-support — it's a static GIF; `index.html` itself still auto-switches),
-reusing `index.html`'s `:root` light-mode tokens (the `@media
-(prefers-color-scheme: light)` block): `--bg:#f6f7f9 --card-bg:#ffffff
---border:#e3e6ec --text:#1a1d24 --muted:#5b6472 --accent:#3b5bdb
+**Design: K cards visible side by side, shuffling.** `K = min(N, 3)` — 3
+fixed slots shown at once (never more, to keep the footprint constant);
+fewer if there are under 3 projects. Every project card is always visible
+at `K = 3`; the "shuffle" is a position swap, not a content swap. Light
+theme only (no `prefers-color-scheme` support — it's a static GIF;
+`index.html` itself still auto-switches), reusing `index.html`'s `:root`
+light-mode tokens: `--bg:#f6f7f9 --card-bg:#ffffff --border:#e3e6ec
+--text:#1a1d24 --muted:#5b6472 --accent:#3b5bdb
 --tag-bg:rgba(59,91,219,0.08) --tag-border:rgba(59,91,219,0.25)`.
-`pages/banner.svg` uses the same light tokens for consistency — both
-static assets should always use the same palette as each other (currently
-light), even though `index.html` itself adapts to the visitor's system
-theme.
+`pages/banner.svg` uses the same light tokens — both static assets should
+always share one palette, even though `index.html` itself adapts to the
+visitor's system theme.
 
-**Timing — generalizes to N projects.** `HOLD = 1.8s`, `TRANS = 0.4s`,
-`SEG = HOLD + TRANS = 2.2s`. Total duration `D = N * SEG`. For very large N
-(more than ~8 projects pushes the loop past ~18s), shorten `HOLD` so the
-full loop stays under roughly 15–20s — don't change `TRANS`.
+**Canvas**: 880×240 at `K=3` (264px-wide card slots, 24px outer padding,
+20px gaps — same row math as `banner.svg`'s two-up layout, just three-up).
+For `K=2` use the `banner.svg` two-card geometry (404px slots) at a
+shorter, squarer canvas; for `K=1` it degenerates to the old single-card
+cycle (see git history before this section was rewritten, if ever needed
+again).
 
-For card `i` (0-indexed, 0 ≤ i < N), on its own `data-track-index="i+1"`:
+**`K=3` is a pure cyclic rotation — the common case for ≤3 projects.**
+Slot left-edges: `SLOTS = [24, 308, 592]`. Each card's CSS `left` is fixed
+to its home slot (cycle 0 position); everything else is a GSAP `x`
+(translateX) offset from home. Every cycle, every card advances one slot
+to the right, wrapping the rightmost card back to the leftmost — after
+exactly 3 cycles every card is back at its slot-0 position, so the loop
+point is bit-for-bit identical to `t=0` and the GIF loops with no visible
+seam. `HOLD = 1.8s`, `TRANS = 0.6s`, `SEG = HOLD+TRANS = 2.4s`, total
+duration `D = 3*SEG = 7.2s`.
 
-```
-start_i    = (i == 0)     ? 0 : i*SEG - TRANS
-end_i      = (i == N-1)   ? D : (i+1)*SEG
-duration_i = end_i - start_i
-```
-
-A `#dots` clip spans the whole timeline (`data-start="0" data-duration="D"
-data-track-index="N+1"`) holding one `<span class="dot" id="dot{i}">` per
-project, centered at the bottom.
-
-GSAP timeline: set the initial state at `t=0` (card 0 opacity 1 / scale 1 /
-y 0, dot 0 accent-colored + scaled 1.3; every other card opacity 0 / scale
-0.96 / y 8, every other dot muted-bordered + scale 1). Then for each
-transition `i -> i+1` (i from 0 to N-2), at `t = i*SEG + HOLD`:
+For card `c` with home slot `h_c` (0, 1, or 2), its `x` delta at cycle `k`
+(0, 1, 2) is `SLOTS[(h_c + k) % 3] - SLOTS[h_c]`. Each transition starts at
+`t = k*SEG + HOLD` and tweens to the next cycle's deltas:
 
 ```js
-tl.to(`#card${i}`,   { opacity: 0, scale: 0.96, y: -8, duration: TRANS, ease: "power2.in" }, t);
-tl.to(`#card${i+1}`, { opacity: 1, scale: 1,    y: 0,  duration: TRANS, ease: "power2.out" }, t);
-tl.to(`#dot${i}`,    { backgroundColor: "#e3e6ec", scale: 1,   duration: TRANS }, t);
-tl.to(`#dot${i+1}`,  { backgroundColor: "#3b5bdb", scale: 1.3, duration: TRANS }, t);
+const SLOTS = [24, 308, 592];
+const HOLD = 1.8, TRANS = 0.6, SEG = HOLD + TRANS;
+// deltasFor(homeSlot) -> [cycle0, cycle1, cycle2] x-offsets from home
+const deltasFor = (h) => [0, 1, 2].map((k) => SLOTS[(h + k) % 3] - SLOTS[h]);
+const deltasA = deltasFor(0), deltasB = deltasFor(1), deltasC = deltasFor(2);
+
+tl.set(["#cardA", "#cardB", "#cardC"], { x: 0, scale: 1, zIndex: 1 }, 0);
+const wrappers = ["#cardC", "#cardB", "#cardA"]; // the card doing the long wrap-around each cycle
+const allCards = ["#cardA", "#cardB", "#cardC"];
+for (let cycle = 0; cycle < 3; cycle++) {
+  const t = cycle * SEG + HOLD;
+  const next = (cycle + 1) % 3;
+  const wrapId = wrappers[cycle];
+  const others = allCards.filter((id) => id !== wrapId);
+  tl.set(wrapId, { zIndex: 0 }, t);
+  tl.set(others, { zIndex: 2 }, t);
+  tl.to("#cardA", { x: deltasA[next], duration: TRANS, ease: "power2.inOut" }, t);
+  tl.to("#cardB", { x: deltasB[next], duration: TRANS, ease: "power2.inOut" }, t);
+  tl.to("#cardC", { x: deltasC[next], duration: TRANS, ease: "power2.inOut" }, t);
+  tl.to(allCards, { scale: 0.97, opacity: 0.85, duration: TRANS / 2, ease: "power1.inOut" }, t);
+  tl.to(allCards, { scale: 1, opacity: 1, duration: TRANS / 2, ease: "power1.inOut" }, t + TRANS / 2);
+  tl.set(allCards, { zIndex: 1 }, t + TRANS);
+}
 ```
 
-**Card markup** (per project, inside its `.clip`): a small accent top-bar,
-an `.icon-chip` with the project's emoji, `.card-title`, one-line
-`.card-desc`, and up to 2 `.tag` pills — same visual language as
-`index.html`'s cards, scaled down to fit 420×240.
+The `zIndex` dip + `opacity: 0.85` mid-transition is required, not
+cosmetic: with 3 cards rotating through 3 slots, the card making the long
+(2-slot) wrap necessarily crosses paths with the other two mid-slide.
+`npx hyperframes inspect` flags that crossing as `text_occluded` /
+`content_overlap` unless you either (a) route the motion around it, or (b)
+do what's above — dip the wrapping card's z-index and everyone's opacity
+so the cross-fade reads as an intentional shuffle. Mark each `.card` clip
+`data-layout-allow-occlusion="true" data-layout-allow-overlap="true"` so
+`inspect` doesn't flag the by-design overlap as an error.
 
-**Build, lint, render**:
+**`K>3` (more than 3 projects, not yet built)**: keep 3 visible slots, but
+treat the rotation as a sliding window over all `N` projects instead of a
+closed permutation of 3 — each "cycle" swaps one slot's occupant for the
+next not-yet-shown project (slide out / slide in from off-canvas, same
+`TRANS` crossfade), advancing until all `N` projects have appeared once,
+then the window is back to its starting 3 and the loop closes. Don't reuse
+the closed 3-card rotation above unmodified for `N>3`; it has no concept of
+a project that isn't one of the 3 visible cards.
+
+**Card markup** (per project, inside its `.clip`): a small accent top-bar,
+a 36px `.icon-chip` with the project's emoji, `.card-title` (15px),
+one-line `.card-desc` (11px), and up to 2 `.tag` pills (9.5px) — same
+visual language as `index.html`'s cards, scaled down to fit a 264×200
+slot.
+
+**Build, lint, inspect, render**:
 
 ```bash
 WORKDIR="$(mktemp -d)/card-cycle"
 npx hyperframes init "$WORKDIR" --non-interactive --example=blank
 # write the composition to "$WORKDIR/index.html" per the contract above
-npx hyperframes lint "$WORKDIR"
-npx hyperframes inspect "$WORKDIR"
+npx hyperframes lint "$WORKDIR"      # benign: "overlapping_gsap_tweens" warnings on x vs scale/opacity are expected
+npx hyperframes inspect "$WORKDIR"   # must be 0 issues — the allow-occlusion/allow-overlap attributes should clear it
 npx hyperframes render "$WORKDIR" --format gif --fps 15 --gif-loop 0 \
   -o "$WORKDIR/renders/card-cycle.gif"
 cp "$WORKDIR/renders/card-cycle.gif" pages/card-cycle.gif
 ```
 
-Optionally `npx hyperframes snapshot "$WORKDIR" -o "$WORKDIR/snapshots"`
-and view `contact-sheet.jpg` to sanity-check that each card shows the right
-content with the right dot highlighted before copying into `pages/`.
+Sanity-check with `npx hyperframes snapshot "$WORKDIR" -o "$WORKDIR/snapshots" --at <comma-separated-seconds>`
+(the `--at` flag, not `--times`) and view `contact-sheet.jpg` — confirm the
+loop point (`t=0` vs `t=D`) is visually identical, and check a
+mid-transition timestamp (e.g. `HOLD + TRANS/2` of the first cycle) to
+confirm the wrap crossing reads as a soft shuffle, not a hard glitch.
