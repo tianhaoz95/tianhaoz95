@@ -6,6 +6,7 @@ on:
   push:
     branches: [master]
     paths:
+      - "site/**"
       - "pages/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
@@ -26,13 +27,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Build
+        working-directory: site
+        run: npm run build
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: pages
+          path: site/dist
 
   deploy:
     needs: build
