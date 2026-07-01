@@ -22,46 +22,91 @@ let visionReady = false;
 
 const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }];
 
-function createTextWorker(ui: ChatUIController): Promise<void> {
+type Device = 'webgpu' | 'wasm';
+
+// A `GPUAdapter` existing isn't enough to trust the large model to it: a
+// software/CPU-emulated adapter (e.g. SwiftShader) reports as WebGPU-capable
+// but still runs the whole session through the same constrained WASM heap
+// as the plain CPU backend, with no real GPU memory to lean on. Detecting
+// that up front (via `GPUAdapterInfo.isFallbackAdapter`) means we go
+// straight to the small model on those devices instead of gambling on a
+// large-model attempt that's likely to fail anyway.
+async function detectPreferredDevice(): Promise<Device> {
+  const gpu = (navigator as unknown as { gpu?: { requestAdapter: () => Promise<any> } }).gpu;
+  if (!gpu) return 'wasm';
+  try {
+    const adapter = await gpu.requestAdapter();
+    if (!adapter) return 'wasm';
+    const info = adapter.info ?? (await adapter.requestAdapterInfo?.());
+    return info?.isFallbackAdapter ? 'wasm' : 'webgpu';
+  } catch {
+    return 'wasm';
+  }
+}
+
+function wireModelWorker(
+  worker: Worker,
+  kind: 'text' | 'vision',
+  device: Device,
+  ui: ChatUIController,
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    textWorker = new Worker(new URL('./textModel.worker.ts', import.meta.url), { type: 'module' });
-    textWorker.onmessage = (e: MessageEvent) => {
+    worker.onmessage = (e: MessageEvent) => {
       const { type } = e.data;
       if (type === 'status') {
         const { state, progress, loaded, total, files, error } = e.data;
-        ui.setStatus('text', { state, progress, loaded, total, files, error });
-        if (state === 'ready') {
-          textReady = true;
-          resolve();
-        } else if (state === 'error') {
-          reject(new Error(error));
-        }
+        ui.setStatus(kind, { state, progress, loaded, total, files, error });
+        if (state === 'ready') resolve();
+        else if (state === 'error') reject(new Error(error));
       }
     };
-    textWorker.onerror = (err) => reject(err);
-    textWorker.postMessage({ type: 'init' });
+    worker.onerror = (err) => reject(new Error(err.message || 'Worker error'));
+    worker.postMessage({ type: 'init', data: { device } });
   });
 }
 
-function createVisionWorker(ui: ChatUIController): Promise<void> {
-  return new Promise((resolve, reject) => {
-    visionWorker = new Worker(new URL('./visionModel.worker.ts', import.meta.url), { type: 'module' });
-    visionWorker.onmessage = (e: MessageEvent) => {
-      const { type } = e.data;
-      if (type === 'status') {
-        const { state, progress, loaded, total, files, error } = e.data;
-        ui.setStatus('vision', { state, progress, loaded, total, files, error });
-        if (state === 'ready') {
-          visionReady = true;
-          resolve();
-        } else if (state === 'error') {
-          reject(new Error(error));
-        }
-      }
-    };
-    visionWorker.onerror = (err) => reject(err);
-    visionWorker.postMessage({ type: 'init' });
-  });
+// Each attempt gets its own worker rather than retrying in-process: testing
+// showed a failed large-model WebGPU attempt can leave the shared WASM heap
+// fragmented enough that a same-worker WASM fallback afterward *also*
+// throws `std::bad_alloc`, even though that same model succeeds reliably
+// when it's a clean worker's only attempt. Terminating the failed worker
+// before spinning up a new one ensures the fallback starts from scratch.
+async function createWorkerWithFallback(
+  factory: () => Worker,
+  kind: 'text' | 'vision',
+  ui: ChatUIController,
+): Promise<Worker> {
+  const device = await detectPreferredDevice();
+  const worker = factory();
+  try {
+    await wireModelWorker(worker, kind, device, ui);
+    return worker;
+  } catch (err) {
+    if (device === 'wasm') throw err; // already the safe path — nothing left to fall back to
+    console.warn(`${kind} model failed to load on WebGPU, retrying with a fresh WASM worker:`, err);
+    worker.terminate();
+    const fallbackWorker = factory();
+    await wireModelWorker(fallbackWorker, kind, 'wasm', ui);
+    return fallbackWorker;
+  }
+}
+
+async function createTextWorker(ui: ChatUIController): Promise<void> {
+  textWorker = await createWorkerWithFallback(
+    () => new Worker(new URL('./textModel.worker.ts', import.meta.url), { type: 'module' }),
+    'text',
+    ui,
+  );
+  textReady = true;
+}
+
+async function createVisionWorker(ui: ChatUIController): Promise<void> {
+  visionWorker = await createWorkerWithFallback(
+    () => new Worker(new URL('./visionModel.worker.ts', import.meta.url), { type: 'module' }),
+    'vision',
+    ui,
+  );
+  visionReady = true;
 }
 
 async function ensureTextWorker(ui: ChatUIController): Promise<void> {

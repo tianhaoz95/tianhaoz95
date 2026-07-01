@@ -18,6 +18,20 @@ if (env.backends?.onnx?.wasm) {
 
 const MODEL_ID = 'HuggingFaceTB/SmolVLM-256M-Instruct';
 
+// Same mitigation as textModel.worker.ts: onnxruntime-web's default CPU
+// memory arena can throw `std::bad_alloc` from InferenceSession.create() on
+// memory-constrained devices even when the model would otherwise fit — and
+// WebGPU sessions still run this same arena logic for their shared
+// (non-GPU) bookkeeping. Disabling the arena/mem-pattern optimizations
+// trades a little perf for a much lower peak-memory footprint, on either
+// backend.
+const SAFE_SESSION_OPTIONS = {
+  executionMode: 'sequential' as const,
+  enableCpuMemArena: false,
+  enableMemPattern: false,
+  graphOptimizationLevel: 'disabled' as const,
+};
+
 let processor: any = null;
 let model: any = null;
 
@@ -29,10 +43,17 @@ interface ProgressData {
   total?: number;
 }
 
+// Like textModel.worker.ts, this worker attempts exactly one device per
+// instance — session.ts decides which device to request and spins up a
+// fresh worker for the fallback if this one fails, rather than retrying
+// in-process (a failed WebGPU attempt can leave the WASM heap fragmented
+// enough that a same-worker WASM retry afterward also fails).
 self.onmessage = async (e: MessageEvent) => {
   const { type, data } = e.data;
 
   if (type === 'init') {
+    const device: 'webgpu' | 'wasm' = data?.device === 'webgpu' ? 'webgpu' : 'wasm';
+
     try {
       self.postMessage({ type: 'status', state: 'loading', progress: 0, loaded: 0, total: 0, files: [] });
 
@@ -49,25 +70,16 @@ self.onmessage = async (e: MessageEvent) => {
       };
 
       processor = await AutoProcessor.from_pretrained(MODEL_ID, { progress_callback });
-
-      try {
-        model = await AutoModelForVision2Seq.from_pretrained(MODEL_ID, {
-          dtype: 'fp32',
-          device: 'webgpu',
-          progress_callback,
-        });
-      } catch (gpuError) {
-        console.warn('WebGPU failed or unsupported, falling back to WASM:', gpuError);
-        model = await AutoModelForVision2Seq.from_pretrained(MODEL_ID, {
-          dtype: 'fp32',
-          device: 'wasm',
-          progress_callback,
-        });
-      }
+      model = await AutoModelForVision2Seq.from_pretrained(MODEL_ID, {
+        dtype: 'fp32',
+        device,
+        progress_callback,
+        session_options: SAFE_SESSION_OPTIONS,
+      });
 
       self.postMessage({ type: 'status', state: 'ready' });
     } catch (err) {
-      console.error('Failed to load vision model:', err);
+      console.error(`Failed to load vision model (${device}):`, err);
       self.postMessage({ type: 'status', state: 'error', error: (err as Error).message });
     }
   } else if (type === 'analyze') {

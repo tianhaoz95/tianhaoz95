@@ -11,12 +11,25 @@ if (env.backends?.onnx?.wasm) {
   env.backends.onnx.wasm.numThreads = 1;
 }
 
-// 1.5B on WebGPU for quality; WASM (no GPU) falls back to 0.5B — the 1.5B
-// model reliably throws `std::bad_alloc` on the WASM backend (confirmed via
-// local testing), the same memory ceiling that limits zerog-tools' own
-// chat feature to 0.5B for its WASM path.
+// 1.5B on WebGPU (real hardware) for quality; WASM/software-WebGPU falls
+// back to 0.5B — the 1.5B model reliably throws `std::bad_alloc` on the
+// shared WASM heap that both backends run through, the same memory ceiling
+// that limits zerog-tools' own chat feature to 0.5B for its WASM path.
 const MODEL_ID_WEBGPU = 'onnx-community/Qwen2.5-1.5B-Instruct';
 const MODEL_ID_WASM = 'onnx-community/Qwen2.5-0.5B-Instruct';
+
+// onnxruntime-web's default CPU memory arena pre-allocates in large growing
+// chunks, which can throw `std::bad_alloc` from InferenceSession.create()
+// even when the model would otherwise comfortably fit — and WebGPU sessions
+// still run this same arena logic for their shared (non-GPU) bookkeeping.
+// Disabling the arena/mem-pattern optimizations trades a little perf for a
+// much lower peak-memory footprint during session setup, on either backend.
+const SAFE_SESSION_OPTIONS = {
+  executionMode: 'sequential' as const,
+  enableCpuMemArena: false,
+  enableMemPattern: false,
+  graphOptimizationLevel: 'disabled' as const,
+};
 
 let generator: TextGenerationPipeline | null = null;
 
@@ -28,10 +41,21 @@ interface ProgressData {
   total?: number;
 }
 
+// This worker attempts exactly one (device, model) pair per instance — the
+// caller (session.ts) decides which device to request and, if it fails,
+// spins up a *fresh* worker for the fallback rather than retrying here.
+// That matters: testing showed a failed large-model WebGPU attempt can
+// leave the WASM heap fragmented enough that a same-worker WASM fallback
+// afterward *also* fails with `std::bad_alloc`, even though that same
+// fallback model succeeds reliably when it's a clean worker's first and
+// only attempt.
 self.onmessage = async (e: MessageEvent) => {
   const { type, data } = e.data;
 
   if (type === 'init') {
+    const device: 'webgpu' | 'wasm' = data?.device === 'webgpu' ? 'webgpu' : 'wasm';
+    const modelId = device === 'webgpu' ? MODEL_ID_WEBGPU : MODEL_ID_WASM;
+
     try {
       self.postMessage({ type: 'status', state: 'loading', progress: 0, loaded: 0, total: 0, files: [] });
 
@@ -43,24 +67,16 @@ self.onmessage = async (e: MessageEvent) => {
         }
       };
 
-      try {
-        generator = await pipeline('text-generation', MODEL_ID_WEBGPU, {
-          device: 'webgpu',
-          dtype: 'q4',
-          progress_callback,
-        });
-      } catch (gpuError) {
-        console.warn('WebGPU failed or unsupported, falling back to WASM with the smaller model:', gpuError);
-        generator = await pipeline('text-generation', MODEL_ID_WASM, {
-          device: 'wasm',
-          dtype: 'q4',
-          progress_callback,
-        });
-      }
+      generator = await pipeline('text-generation', modelId, {
+        device,
+        dtype: 'q4',
+        progress_callback,
+        session_options: SAFE_SESSION_OPTIONS,
+      });
 
       self.postMessage({ type: 'status', state: 'ready' });
     } catch (err) {
-      console.error('Failed to load text-generation model:', err);
+      console.error(`Failed to load text-generation model (${device}):`, err);
       self.postMessage({ type: 'status', state: 'error', error: (err as Error).message });
     }
   } else if (type === 'generate') {
