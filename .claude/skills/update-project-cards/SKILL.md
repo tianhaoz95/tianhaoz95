@@ -1,6 +1,6 @@
 ---
 name: update-project-cards
-description: Regenerates the #projects section of this repo's GitHub Pages profile (pages/index.html, pages/banner.svg, and the animated pages/card-cycle.gif + pages/card-cycle-dark.gif) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
+description: Regenerates the #projects section of this repo's GitHub Pages profile (pages/index.html, the light/dark pages/banner*.svg pair, and the animated light/dark pages/card-cycle*.gif pair) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
 ---
 
 # Update Project Cards
@@ -15,14 +15,20 @@ artifact on every push that touches `pages/**`.
 skill only owns the `#projects` section.** Don't touch `.site-nav`,
 `#about`, `#skills`, or `#contact` when running this skill; those are a
 separate concern (bio, tech-stack tags, social links) with no per-project
-data in them. Three artifacts make up the `#projects` section and must
+data in them. Four artifacts make up the `#projects` section and must
 stay in sync:
 
-- The `#projects` section of `pages/index.html` — a `.hero` block (stacks
-  `banner.svg` above `card-cycle.gif` as a compact preview) followed by
-  the full `.grid` of one `.card` per project.
-- `pages/banner.svg` — a static two-card-per-row preview of every project
-  card, shown in the `.hero` block above the GIF.
+- The `#projects` section of `pages/index.html` — a `.hero` block with two
+  `<picture>` elements (banner then GIF, each with a
+  `(prefers-color-scheme: dark)` `<source>`) followed by the full `.grid`
+  of one `.card` per project. Both the hero images and the rest of the
+  page (nav/about/skills/projects text/contact, all CSS-variable driven)
+  theme-switch on the *visitor's OS/browser* preference — independent from
+  `README.md`'s switch, which reacts to the *visitor's GitHub UI theme
+  setting* instead (see below).
+- `pages/banner.svg` (light) and `pages/banner-dark.svg` (dark) — a static
+  two-card-per-row preview of every project card, shown in the `.hero`
+  block above the GIF.
 - `pages/card-cycle.gif` (light) and `pages/card-cycle-dark.gif` (dark) —
   the same looping animation (rendered at 1760×480 pixels — 2x a logical
   880×240 design, for retina sharpness; see "Rendering at 2x" below —
@@ -33,16 +39,34 @@ stay in sync:
   (shuffling through more cards than fit on screen at once) rather than
   *space* (a grid that keeps getting taller). Generated with the
   `hyperframes` CLI (a `motion-graphics`-style composition) — see
-  "Regenerating the GIF" below. **Both light and dark variants must be
-  regenerated together** — never update one without the other, or
-  `README.md`'s theme switch (below) will show a stale frame in whichever
-  theme wasn't touched.
+  "Regenerating the GIF" below.
 
-`README.md` embeds both GIFs via a `<picture>` element with
-`prefers-color-scheme` sources, switching on the visitor's GitHub theme
-setting, wrapped in an `<a>` to the live Pages site (`pages/index.html`
-itself stays light-only in its `#projects` hero — see "Regenerating the
-GIF" for why the two surfaces intentionally differ):
+**All four light/dark pairs (`banner.svg`/`banner-dark.svg`,
+`card-cycle.gif`/`card-cycle-dark.gif`) must be regenerated together, in
+lockstep with each other and with `index.html`** — never update one
+without the rest, or one surface (the Pages hero or the README) will show
+a stale frame in whichever theme/asset wasn't touched.
+
+`pages/index.html`'s hero uses `<picture>` + `<source
+media="(prefers-color-scheme: dark)">` directly in the page's own HTML:
+
+```html
+<picture>
+  <source srcset="banner-dark.svg" media="(prefers-color-scheme: dark)" />
+  <img class="hero-banner" src="banner.svg" alt="..." loading="lazy" />
+</picture>
+<picture>
+  <source srcset="card-cycle-dark.gif" media="(prefers-color-scheme: dark)" />
+  <img class="hero-gif" src="card-cycle.gif" alt="..." loading="lazy" width="880" height="240" />
+</picture>
+```
+
+`README.md` embeds both GIFs the same way but wrapped in an `<a>` to the
+live Pages site, switching on the visitor's **GitHub UI theme setting**
+rather than their OS/browser preference (both happen to use the same
+`prefers-color-scheme` media feature under the hood, but GitHub applies it
+based on the theme the visitor picked in their GitHub settings, which can
+differ from their OS):
 
 ```html
 <a href="https://tianhaoz95.github.io/tianhaoz95/">
@@ -63,7 +87,11 @@ either way. The `<img>`'s `width="880" height="240"` attributes are
 required, not decorative — the GIF files are actually 1760×480 (2x, for
 retina; see "Rendering at 2x" below), and without an explicit size markdown
 renders images at their native pixel dimensions as CSS pixels, which would
-make the banner display twice the intended size.
+make the banner display twice the intended size. `pages/index.html`'s
+`.hero-gif` doesn't strictly need the width/height attributes since its
+own CSS (`max-width: 600px`) already overrides displayed size, but they're
+included anyway as a layout-shift-avoidance hint with the correct 11:3
+aspect ratio.
 
 Projects live as git submodules under `./projects/*` (declared in
 `.gitmodules`).
@@ -116,24 +144,31 @@ Projects live as git submodules under `./projects/*` (declared in
    `.card`, `.card-media`, `.card-body`, `.card-title`, `.card-desc`,
    `.tags`/`.tag`) — don't restyle the page. `.card-media.icon-only` is for
    projects whose only available image is a small icon/favicon rather than
-   a screenshot. The `.hero` block's `src="banner.svg"` / `src="card-cycle.gif"`
-   paths don't change; only their `alt` text needs updating if the project
-   list changed (list every project name in the alt text). If a new
-   project's tech stack is a real addition to what's already covered in
-   `#skills`, flag it to the user — this skill doesn't edit `#skills`
-   itself, but stale skill tags are worth surfacing.
+   a screenshot. The `.hero` block's two `<picture>` elements
+   (`banner.svg`/`banner-dark.svg` and `card-cycle.gif`/`card-cycle-dark.gif`)
+   don't change their `src`/`srcset` paths; only their `alt` text needs
+   updating if the project list changed (list every project name in the
+   alt text). If a new project's tech stack is a real addition to what's
+   already covered in `#skills`, flag it to the user — this skill doesn't
+   edit `#skills` itself, but stale skill tags are worth surfacing.
 
-5. **Regenerate `pages/banner.svg`** to match the same set of cards in the
-   same compact two-card-per-row layout. If there are more than 2 projects,
-   wrap to additional rows and grow the `viewBox`/`height` accordingly,
-   keeping each card block the same width/style as the existing ones.
+5. **Regenerate `pages/banner.svg` and `pages/banner-dark.svg` together**
+   to match the same set of cards in the same compact two-card-per-row
+   layout — same content and layout in both, only the color tokens differ
+   (see the light/dark table in "Regenerating the GIF"; the SVG `<style>`
+   block's `.bg`/`.card`/`.title`/`.desc`/`.tag`/`.tagbg`/`.heading` fill
+   and stroke colors are the only thing that should differ between the two
+   files). If there are more than 2 projects, wrap to additional rows and
+   grow the `viewBox`/`height` accordingly, keeping each card block the
+   same width/style as the existing ones, in both files identically.
 
-6. **Regenerate `pages/card-cycle.gif`.** Always do a full regenerate (not a
-   patch) so the cycle stays internally consistent — see "Regenerating the
-   GIF" below for the exact composition. Always rebuild `banner.svg`,
-   `card-cycle.gif`, and `index.html` together in the same skill run; never
-   let one update without the others, or the hero preview and the full grid
-   will disagree on the project list.
+6. **Regenerate `pages/card-cycle.gif` and `pages/card-cycle-dark.gif`
+   together.** Always do a full regenerate (not a patch) so the cycle
+   stays internally consistent — see "Regenerating the GIF" below for the
+   exact composition. Always rebuild both banner SVGs, both GIFs, and
+   `index.html` together in the same skill run; never let one update
+   without the others, or the hero preview and the full grid will disagree
+   on the project list, or the two themes will disagree with each other.
 
 7. **Leave `README.md` alone** unless the "## Projects" section or either
    GIF's path/filename changed — it just embeds `card-cycle.gif` /
@@ -152,6 +187,8 @@ Projects live as git submodules under `./projects/*` (declared in
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/card-cycle.gif
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/card-cycle-dark.gif
+   curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/banner.svg
+   curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/banner-dark.svg
    curl -s https://tianhaoz95.github.io/tianhaoz95/ | grep -o "<project name>"
    ```
 
@@ -199,11 +236,14 @@ lets each GIF blend into the README with no visible edge on github.com,
 regardless of the visitor's GitHub theme. The card colors themselves reuse
 `index.html`'s own `:root` tokens (light and dark blocks respectively) —
 only the outer canvas is GitHub-matched, not the whole palette.
-`pages/banner.svg` and `pages/index.html`'s `#projects` hero stay
-**light-only** (the light-token row above) — only `README.md` theme-
-switches, via the `<picture>` element described earlier. Regenerate both
-GIFs from one shared composition file, swapping only the color constants
-between runs, so they never drift into different layouts or timing.
+Both the GIF pair and the `banner.svg`/`banner-dark.svg` pair are shared
+assets: `pages/index.html`'s `#projects` hero theme-switches on the
+visitor's OS/browser preference (its own `<picture>` sources), and
+`README.md` theme-switches on the visitor's GitHub UI theme (its own
+separate `<picture>` sources) — same two files, two independent switches.
+Regenerate both GIFs (and both banner SVGs) from one shared
+composition/template, swapping only the color constants between runs, so
+the pair never drifts into different layouts or timing from each other.
 
 **Rendering at 2x for retina.** The composition is authored and rendered
 at exactly **2x** a logical 880×240 / `K=3` design — 1760×480 actual

@@ -356,8 +356,14 @@
       <h2>A few things I'm building</h2>
 
       <div class="hero">
-        <img class="hero-banner" src="banner.svg" alt="Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
-        <img class="hero-gif" src="card-cycle.gif" alt="Project cards for Meowtrix, ZeroG Toolbox, and Catpuccino.ai shuffling side by side" loading="lazy" />
+        <picture>
+          <source srcset="banner-dark.svg" media="(prefers-color-scheme: dark)" />
+          <img class="hero-banner" src="banner.svg" alt="Static preview of all project cards: Meowtrix, ZeroG Toolbox, and Catpuccino.ai" loading="lazy" />
+        </picture>
+        <picture>
+          <source srcset="card-cycle-dark.gif" media="(prefers-color-scheme: dark)" />
+          <img class="hero-gif" src="card-cycle.gif" alt="Project cards for Meowtrix, ZeroG Toolbox, and Catpuccino.ai shuffling side by side" loading="lazy" width="880" height="240" />
+        </picture>
       </div>
 
       <div class="grid">
