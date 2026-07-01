@@ -1,6 +1,6 @@
 ---
 name: update-project-cards
-description: Regenerates the project cards gallery on this repo's GitHub Pages site (pages/index.html, pages/banner.svg, and the animated pages/card-cycle.gif) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
+description: Regenerates the #projects section of this repo's GitHub Pages profile (pages/index.html, pages/banner.svg, and the animated pages/card-cycle.gif + pages/card-cycle-dark.gif) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
 ---
 
 # Update Project Cards
@@ -23,20 +23,36 @@ stay in sync:
   the full `.grid` of one `.card` per project.
 - `pages/banner.svg` — a static two-card-per-row preview of every project
   card, shown in the `.hero` block above the GIF.
-- `pages/card-cycle.gif` — a looping animation (880×240 at 3 projects) that
-  shows project cards side by side and periodically shuffles their
-  positions (a seamless cyclic rotation, so the loop point is invisible).
-  This is what keeps the gallery usable in a small footprint as the project
-  count grows — it's the only artifact that scales by *time* (shuffling
-  through more cards than fit on screen at once) rather than *space* (a
-  grid that keeps getting taller). Generated with the `hyperframes` CLI (a
+- `pages/card-cycle.gif` (light) and `pages/card-cycle-dark.gif` (dark) —
+  the same looping animation (880×240 at 3 projects, project cards side by
+  side, periodically shuffling positions in a seamless cyclic rotation —
+  the loop point is invisible) rendered twice, once per theme. This is
+  what keeps the gallery usable in a small footprint as the project count
+  grows — it's the only artifact that scales by *time* (shuffling through
+  more cards than fit on screen at once) rather than *space* (a grid that
+  keeps getting taller). Generated with the `hyperframes` CLI (a
   `motion-graphics`-style composition) — see "Regenerating the GIF" below.
+  **Both light and dark variants must be regenerated together** — never
+  update one without the other, or `README.md`'s theme switch (below) will
+  show a stale frame in whichever theme wasn't touched.
 
-`README.md` embeds `pages/card-cycle.gif` (not `banner.svg`) via a
-**relative path** (`![Projects](pages/card-cycle.gif)`), clicking through
-to the live Pages site — GitHub strips `<iframe>`/live HTML from profile
-READMEs, so an animated GIF is the richest format that still renders
-there. Keep the `src` relative rather than the deployed
+`README.md` embeds both GIFs via a `<picture>` element with
+`prefers-color-scheme` sources, switching on the visitor's GitHub theme
+setting, wrapped in an `<a>` to the live Pages site (`pages/index.html`
+itself stays light-only in its `#projects` hero — see "Regenerating the
+GIF" for why the two surfaces intentionally differ):
+
+```html
+<a href="https://tianhaoz95.github.io/tianhaoz95/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
+    <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
+    <img alt="Projects" src="pages/card-cycle.gif">
+  </picture>
+</a>
+```
+
+Both `srcset`/`src` paths are **relative**, not the deployed
 `https://tianhaoz95.github.io/tianhaoz95/...` URL: a relative path
 resolves to the committed file the instant it's pushed, with no
 dependency on the Pages deploy workflow finishing first — the link
@@ -113,10 +129,10 @@ Projects live as git submodules under `./projects/*` (declared in
    let one update without the others, or the hero preview and the full grid
    will disagree on the project list.
 
-7. **Leave `README.md` alone** unless the "## Projects" section or the
-   GIF's path/filename changed — it just links to `card-cycle.gif` and
-   doesn't need per-project edits (the GIF itself carries the per-project
-   content).
+7. **Leave `README.md` alone** unless the "## Projects" section or either
+   GIF's path/filename changed — it just embeds `card-cycle.gif` /
+   `card-cycle-dark.gif` via the `<picture>` switch and doesn't need
+   per-project edits (the GIFs themselves carry the per-project content).
 
 8. **Show the diff to the user and confirm before pushing.** A push to
    `master` that touches `pages/**` triggers the deploy workflow
@@ -129,6 +145,7 @@ Projects live as git submodules under `./projects/*` (declared in
    gh run watch <run-id> --repo tianhaoz95/tianhaoz95 --exit-status
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/card-cycle.gif
+   curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/card-cycle-dark.gif
    curl -s https://tianhaoz95.github.io/tianhaoz95/ | grep -o "<project name>"
    ```
 
@@ -154,18 +171,33 @@ card its own track); GSAP timeline built paused and registered on
 **Design: K cards visible side by side, shuffling.** `K = min(N, 3)` — 3
 fixed slots shown at once (never more, to keep the footprint constant);
 fewer if there are under 3 projects. Every project card is always visible
-at `K = 3`; the "shuffle" is a position swap, not a content swap. Light
-theme only (no `prefers-color-scheme` support — it's a static GIF;
-`index.html` itself still auto-switches). Card colors reuse `index.html`'s
-`:root` light-mode tokens: `--card-bg:#ffffff --border:#e3e6ec
---text:#1a1d24 --muted:#5b6472 --accent:#3b5bdb
---tag-bg:rgba(59,91,219,0.08) --tag-border:rgba(59,91,219,0.25)`. The
-outer page background is `#ffffff` (not `index.html`'s `--bg:#f6f7f9`) —
-matched to GitHub's actual light-theme canvas color so the GIF blends into
-the README with no visible edge when it renders on github.com.
-`pages/banner.svg` uses the same card palette — both static assets should
-always share one look, even though `index.html` itself adapts to the
-visitor's system theme.
+at `K = 3`; the "shuffle" is a position swap, not a content swap. Neither
+GIF uses `prefers-color-scheme` itself — it's a static render, so light
+and dark are two separate renders of the *same* composition with only the
+color constants swapped:
+
+| Token         | Light (`card-cycle.gif`)        | Dark (`card-cycle-dark.gif`)     |
+| ------------- | -------------------------------- | --------------------------------- |
+| outer page bg | `#ffffff`                        | `#0d1117`                         |
+| `.card` bg    | `#ffffff`                        | `#12151c`                         |
+| border        | `#e3e6ec`                        | `#232733`                         |
+| title text    | `#1a1d24`                        | `#e6e8ef`                         |
+| desc text     | `#5b6472`                        | `#9aa3b2`                         |
+| accent        | `#3b5bdb`                        | `#7c9bff`                         |
+| tag bg/border | `rgba(59,91,219,.08)/.25`        | `rgba(124,155,255,.12)/.25`       |
+
+The outer page background in each case is matched to GitHub's *actual*
+canvas color for that theme (`#ffffff` light / `#0d1117` dark) rather than
+`index.html`'s own `--bg` tokens (`#f6f7f9` / `#0b0d12`) — this is what
+lets each GIF blend into the README with no visible edge on github.com,
+regardless of the visitor's GitHub theme. The card colors themselves reuse
+`index.html`'s own `:root` tokens (light and dark blocks respectively) —
+only the outer canvas is GitHub-matched, not the whole palette.
+`pages/banner.svg` and `pages/index.html`'s `#projects` hero stay
+**light-only** (the light-token row above) — only `README.md` theme-
+switches, via the `<picture>` element described earlier. Regenerate both
+GIFs from one shared composition file, swapping only the color constants
+between runs, so they never drift into different layouts or timing.
 
 **Canvas**: 880×240 at `K=3` (264px-wide card slots, 24px outer padding,
 20px gaps — same row math as `banner.svg`'s two-up layout, just three-up).
@@ -239,21 +271,36 @@ one-line `.card-desc` (11px), and up to 2 `.tag` pills (9.5px) — same
 visual language as `index.html`'s cards, scaled down to fit a 264×200
 slot.
 
-**Build, lint, inspect, render**:
+**Build, lint, inspect, render — once per theme.** Build one composition
+(light colors), verify it, render it, then copy the same file and
+substitute only the color constants from the table above for the dark
+pass — same content, same timing, same lint/inspect checks:
 
 ```bash
 WORKDIR="$(mktemp -d)/card-cycle"
 npx hyperframes init "$WORKDIR" --non-interactive --example=blank
-# write the composition to "$WORKDIR/index.html" per the contract above
+# write the light-palette composition to "$WORKDIR/index.html" per the contract above
 npx hyperframes lint "$WORKDIR"      # benign: "overlapping_gsap_tweens" warnings on x vs scale/opacity are expected
 npx hyperframes inspect "$WORKDIR"   # must be 0 issues — the allow-occlusion/allow-overlap attributes should clear it
 npx hyperframes render "$WORKDIR" --format gif --fps 15 --gif-loop 0 \
   -o "$WORKDIR/renders/card-cycle.gif"
 cp "$WORKDIR/renders/card-cycle.gif" pages/card-cycle.gif
+
+DARKDIR="$(mktemp -d)/card-cycle-dark"
+cp -r "$WORKDIR"/. "$DARKDIR"
+rm -rf "$DARKDIR/renders" "$DARKDIR/snapshots"
+# edit "$DARKDIR/index.html": swap only the color constants (table above) to the dark column
+npx hyperframes lint "$DARKDIR"
+npx hyperframes inspect "$DARKDIR"
+npx hyperframes render "$DARKDIR" --format gif --fps 15 --gif-loop 0 \
+  -o "$DARKDIR/renders/card-cycle-dark.gif"
+cp "$DARKDIR/renders/card-cycle-dark.gif" pages/card-cycle-dark.gif
 ```
 
-Sanity-check with `npx hyperframes snapshot "$WORKDIR" -o "$WORKDIR/snapshots" --at <comma-separated-seconds>`
+Sanity-check each with `npx hyperframes snapshot "$DIR" -o "$DIR/snapshots" --at <comma-separated-seconds>`
 (the `--at` flag, not `--times`) and view `contact-sheet.jpg` — confirm the
 loop point (`t=0` vs `t=D`) is visually identical, and check a
 mid-transition timestamp (e.g. `HOLD + TRANS/2` of the first cycle) to
-confirm the wrap crossing reads as a soft shuffle, not a hard glitch.
+confirm the wrap crossing reads as a soft shuffle, not a hard glitch. Do
+this for both the light and dark render before copying either into
+`pages/`.

@@ -22,4 +22,10 @@
 
 ## Projects 🛠️
 
-[![Projects](pages/card-cycle.gif)](https://tianhaoz95.github.io/tianhaoz95/)
+<a href="https://tianhaoz95.github.io/tianhaoz95/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
+    <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
+    <img alt="Projects" src="pages/card-cycle.gif">
+  </picture>
+</a>
