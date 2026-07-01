@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 
-// pages/ stays the single committed source of truth for the static banner/GIF
+// assets/ stays the single committed source of truth for the static banner/GIF
 // assets (README.md links to them directly via git-relative paths, and the
 // update-project-cards skill writes to them directly) — Vite copies its
 // contents into outDir verbatim on build via publicDir, rather than us
 // duplicating those files into this app.
-const pagesDir = resolve(__dirname, '../pages');
+const assetsDir = resolve(__dirname, '../assets');
 
 // Deliberately NOT setting COOP/COEP headers here (unlike zerog-tools' vite
 // config): this page hotlinks several cross-origin images (avatar, project
@@ -24,7 +24,7 @@ export default defineConfig({
   // so built references resolve correctly regardless of where the site is
   // actually mounted.
   base: './',
-  publicDir: pagesDir,
+  publicDir: assetsDir,
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,

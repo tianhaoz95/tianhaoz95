@@ -24,8 +24,8 @@
 
 <a href="https://tianhaoz95.github.io/tianhaoz95/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
-    <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
-    <img alt="Projects" src="pages/card-cycle.gif" width="880" height="240">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/card-cycle-dark.gif">
+    <source media="(prefers-color-scheme: light)" srcset="assets/card-cycle.gif">
+    <img alt="Projects" src="assets/card-cycle.gif" width="880" height="240">
   </picture>
 </a>

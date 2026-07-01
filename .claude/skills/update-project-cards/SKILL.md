@@ -1,35 +1,50 @@
 ---
 name: update-project-cards
-description: Regenerates the #projects section of this repo's GitHub Pages profile (pages/index.html, the light/dark pages/banner*.svg pair, and the animated light/dark pages/card-cycle*.gif pair) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
+description: Regenerates the #projects section of this repo's GitHub Pages profile (site/src/data/profile.ts + site/src/sections/projects.ts, the light/dark assets/banner*.svg pair, and the animated light/dark assets/card-cycle*.gif pair) from the submodules under ./projects. Use when a project is added, removed, or updated under ./projects, or when the user asks to "update the project cards", "sync the gallery", "refresh the Pages site", "update the gif", or "add a project to the README".
 ---
 
 # Update Project Cards
 
-This repo (`tianhaoz95/tianhaoz95`) is the GitHub profile repo. It deploys a
-static project-cards gallery to GitHub Pages via
-`.github/workflows/deploy-pages.yml`, which uploads `pages/` as the Pages
-artifact on every push that touches `pages/**`.
+This repo (`tianhaoz95/tianhaoz95`) is the GitHub profile repo. `site/` is a
+Vite + vanilla TypeScript app that builds the deployed profile page;
+`.github/workflows/deploy-pages.yml` runs `npm ci && npm run build` inside
+`site/` and uploads its build output (`site/dist`) as the Pages artifact,
+on every push touching `site/**` or `assets/**`.
 
-`pages/index.html` is a full developer-profile page (`.site-nav` +
-`#about` + `#skills` + `#projects` + `#contact`, in that order) — **this
-skill only owns the `#projects` section.** Don't touch `.site-nav`,
-`#about`, `#skills`, or `#contact` when running this skill; those are a
-separate concern (bio, tech-stack tags, social links) with no per-project
-data in them. Four artifacts make up the `#projects` section and must
-stay in sync:
+`assets/` holds **only** four static files — `banner.svg`, `banner-dark.svg`,
+`card-cycle.gif`, `card-cycle-dark.gif` — plus `.nojekyll`. It is not itself
+deployed; `site/vite.config.ts`'s `publicDir` points at `../assets`, so Vite
+copies its contents into the build output at build time. `assets/` is also
+the source `README.md` links to directly via git-relative paths
+(`assets/card-cycle.gif` etc.), independent of the Pages deploy — that
+dependency is why these four files must stay at these exact paths
+regardless of anything else in `site/`.
 
-- The `#projects` section of `pages/index.html` — a `.hero` block with two
-  `<picture>` elements (banner then GIF, each with a
-  `(prefers-color-scheme: dark)` `<source>`) followed by the full `.grid`
-  of one `.card` per project. Both the hero images and the rest of the
-  page (nav/about/skills/projects text/contact, all CSS-variable driven)
-  theme-switch on the *visitor's OS/browser* preference — independent from
-  `README.md`'s switch, which reacts to the *visitor's GitHub UI theme
-  setting* instead (see below).
-- `pages/banner.svg` (light) and `pages/banner-dark.svg` (dark) — a static
-  two-card-per-row preview of every project card, shown in the `.hero`
-  block above the GIF.
-- `pages/card-cycle.gif` (light) and `pages/card-cycle-dark.gif` (dark) —
+`site/` is a full developer-profile app (`site/src/main.ts` renders, in
+order: `.site-nav`, `#about`, `#skills`, `#projects`, `#contact`, footer) —
+**this skill only owns the `#projects` section**, specifically
+`site/src/data/profile.ts`'s `projects` array and `site/src/sections/projects.ts`'s
+templating. Don't touch `site/src/sections/{nav,about,skills,contact}.ts`
+or `profile.ts`'s `name`/`bio`/`pills`/`skillGroups`/`contactLinks` fields
+when running this skill; those are a separate concern (bio, tech-stack
+tags, social links) with no per-project data in them. Four artifacts make
+up the `#projects` section and must stay in sync:
+
+- `site/src/data/profile.ts`'s `projects: Project[]` array (id, emoji,
+  title, description, repoUrl, media, tags — see the `Project` interface
+  in that file) and `profile.hero` (the `banner`/`cardCycle` light/dark
+  filename + alt-text config). `site/src/sections/projects.ts` renders
+  both the `.hero` block (two `<picture>` elements, banner then GIF, each
+  with a `(prefers-color-scheme: dark)` `<source>`) and the `.grid` of
+  `.card`s from this data — never hand-edit rendered HTML, only the data
+  module. Both the hero images and the rest of the page theme-switch on
+  the *visitor's OS/browser* preference — independent from `README.md`'s
+  switch, which reacts to the *visitor's GitHub UI theme setting* instead
+  (see below).
+- `assets/banner.svg` (light) and `assets/banner-dark.svg` (dark) — a
+  static two-card-per-row preview of every project card, shown in the
+  `.hero` block above the GIF.
+- `assets/card-cycle.gif` (light) and `assets/card-cycle-dark.gif` (dark) —
   the same looping animation (rendered at 1760×480 pixels — 2x a logical
   880×240 design, for retina sharpness; see "Rendering at 2x" below —
   showing 3 projects side by side, periodically shuffling positions in a
@@ -43,12 +58,12 @@ stay in sync:
 
 **All four light/dark pairs (`banner.svg`/`banner-dark.svg`,
 `card-cycle.gif`/`card-cycle-dark.gif`) must be regenerated together, in
-lockstep with each other and with `index.html`** — never update one
+lockstep with each other and with `profile.ts`** — never update one
 without the rest, or one surface (the Pages hero or the README) will show
 a stale frame in whichever theme/asset wasn't touched.
 
-`pages/index.html`'s hero uses `<picture>` + `<source
-media="(prefers-color-scheme: dark)">` directly in the page's own HTML:
+`site/src/sections/projects.ts` renders the hero as `<picture>` + `<source
+media="(prefers-color-scheme: dark)">` directly in the page's own DOM:
 
 ```html
 <picture>
@@ -71,9 +86,9 @@ differ from their OS):
 ```html
 <a href="https://tianhaoz95.github.io/tianhaoz95/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
-    <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
-    <img alt="Projects" src="pages/card-cycle.gif" width="880" height="240">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/card-cycle-dark.gif">
+    <source media="(prefers-color-scheme: light)" srcset="assets/card-cycle.gif">
+    <img alt="Projects" src="assets/card-cycle.gif" width="880" height="240">
   </picture>
 </a>
 ```
@@ -87,11 +102,11 @@ either way. The `<img>`'s `width="880" height="240"` attributes are
 required, not decorative — the GIF files are actually 1760×480 (2x, for
 retina; see "Rendering at 2x" below), and without an explicit size markdown
 renders images at their native pixel dimensions as CSS pixels, which would
-make the banner display twice the intended size. `pages/index.html`'s
-`.hero-gif` doesn't strictly need the width/height attributes since its
-own CSS (`max-width: 600px`) already overrides displayed size, but they're
-included anyway as a layout-shift-avoidance hint with the correct 11:3
-aspect ratio.
+make the banner display twice the intended size. `site/`'s `.hero-gif`
+doesn't strictly need the width/height attributes since its own CSS
+(`max-width: 600px`, in `site/src/theme.css`) already overrides displayed
+size, but they're included anyway as a layout-shift-avoidance hint with
+the correct 11:3 aspect ratio.
 
 Projects live as git submodules under `./projects/*` (declared in
 `.gitmodules`).
@@ -109,7 +124,7 @@ Projects live as git submodules under `./projects/*` (declared in
      "Catpuccino.ai" → card says "Catpuccino.ai").
    - **Description**: the first descriptive paragraph under the README
      title, else `package.json` `description`. Keep it to 1–2 sentences for
-     `index.html`, and a single short clause (~6 words) for the GIF card,
+     `profile.ts`, and a single short clause (~6 words) for the GIF card,
      since the GIF canvas is small.
    - **Repo URL**: from `.gitmodules`.
    - **Live site URL**: check, in order — a GitHub Pages deploy workflow
@@ -124,35 +139,33 @@ Projects live as git submodules under `./projects/*` (declared in
      a favicon) over copying binaries into this repo. Verify it resolves
      with curl before using it. The GIF card uses a single emoji per
      project (pick one that fits the project, matching what's already used
-     in `index.html`'s `.card-title` if the project already has a card)
+     in `profile.ts`'s `emoji` field if the project already has a card)
      rather than the hotlinked image — the canvas is too small for a
      screenshot.
-   - **Tags**: 2 short tags per project, reused between `index.html` and the
-     GIF card (`index.html` may show a 3rd tag if there's room; the GIF
-     stays to 2 for space).
+   - **Tags**: 2 short tags per project, reused between `profile.ts`'s
+     `.grid` card and the GIF card (the `.grid` card may show a 3rd tag if
+     there's room; the GIF stays to 2 for space).
 
-3. **Diff against the existing gallery.** Match existing cards in
-   `pages/index.html` by repo URL. Add cards for new projects, update
-   changed fields (description, links, image) for existing ones, and remove
-   cards for projects no longer under `./projects`.
+3. **Diff against the existing gallery.** Match existing entries in
+   `site/src/data/profile.ts`'s `projects` array by `repoUrl`. Add entries
+   for new projects, update changed fields (description, links, image,
+   tags) for existing ones, and remove entries for projects no longer
+   under `./projects`.
 
-4. **Regenerate only the `#projects` section of `pages/index.html`.** Leave
-   `.site-nav`, `#about`, `#skills`, and `#contact` untouched — they hold
-   bio/skills/social content with nothing project-specific in them. Within
-   `#projects`, reuse the existing CSS classes and markup structure
-   (`.section-label`, `.hero`, `.hero-banner`, `.hero-gif`, `.grid`,
-   `.card`, `.card-media`, `.card-body`, `.card-title`, `.card-desc`,
-   `.tags`/`.tag`) — don't restyle the page. `.card-media.icon-only` is for
-   projects whose only available image is a small icon/favicon rather than
-   a screenshot. The `.hero` block's two `<picture>` elements
-   (`banner.svg`/`banner-dark.svg` and `card-cycle.gif`/`card-cycle-dark.gif`)
-   don't change their `src`/`srcset` paths; only their `alt` text needs
-   updating if the project list changed (list every project name in the
-   alt text). If a new project's tech stack is a real addition to what's
-   already covered in `#skills`, flag it to the user — this skill doesn't
-   edit `#skills` itself, but stale skill tags are worth surfacing.
+4. **Edit `site/src/data/profile.ts`'s `projects` array only.** Leave every
+   other field in that file (`name`, `handle`, `avatarUrl`, `bio`, `pills`,
+   `skillGroups`, `contactLinks`) and every other `site/src/sections/*.ts`
+   file untouched — they hold bio/skills/social content with nothing
+   project-specific in them. `profile.hero`'s `banner`/`cardCycle`
+   filenames don't change; only their `alt` text needs updating if the
+   project list changed (list every project name in the alt text). After
+   editing, run `cd site && npx tsc && npm run build` to confirm the
+   `Project[]` shape still type-checks and the build succeeds. If a new
+   project's tech stack is a real addition to what's already covered in
+   `profile.ts`'s `skillGroups`, flag it to the user — this skill doesn't
+   edit `skillGroups` itself, but stale skill tags are worth surfacing.
 
-5. **Regenerate `pages/banner.svg` and `pages/banner-dark.svg` together**
+5. **Regenerate `assets/banner.svg` and `assets/banner-dark.svg` together**
    to match the same set of cards in the same compact two-card-per-row
    layout — same content and layout in both, only the color tokens differ
    (see the light/dark table in "Regenerating the GIF"; the SVG `<style>`
@@ -162,11 +175,11 @@ Projects live as git submodules under `./projects/*` (declared in
    grow the `viewBox`/`height` accordingly, keeping each card block the
    same width/style as the existing ones, in both files identically.
 
-6. **Regenerate `pages/card-cycle.gif` and `pages/card-cycle-dark.gif`
+6. **Regenerate `assets/card-cycle.gif` and `assets/card-cycle-dark.gif`
    together.** Always do a full regenerate (not a patch) so the cycle
    stays internally consistent — see "Regenerating the GIF" below for the
    exact composition. Always rebuild both banner SVGs, both GIFs, and
-   `index.html` together in the same skill run; never let one update
+   `profile.ts` together in the same skill run; never let one update
    without the others, or the hero preview and the full grid will disagree
    on the project list, or the two themes will disagree with each other.
 
@@ -176,8 +189,9 @@ Projects live as git submodules under `./projects/*` (declared in
    per-project edits (the GIFs themselves carry the per-project content).
 
 8. **Show the diff to the user and confirm before pushing.** A push to
-   `master` that touches `pages/**` triggers the deploy workflow
-   automatically — this is a visible, externally-observable change (it
+   `master` that touches `site/**` or `assets/**` triggers the deploy
+   workflow automatically (which now runs a real `npm run build`, not a
+   raw copy) — this is a visible, externally-observable change (it
    updates the live profile page), so don't push without confirmation.
 
 9. **After pushing, verify the deploy**, mirroring how the gallery was
@@ -191,11 +205,15 @@ Projects live as git submodules under `./projects/*` (declared in
    curl -s -o /dev/null -w "%{http_code}\n" https://tianhaoz95.github.io/tianhaoz95/banner-dark.svg
    curl -s https://tianhaoz95.github.io/tianhaoz95/ | grep -o "<project name>"
    ```
+   The live page is a Vite build (`site/dist`), so its `index.html` uses
+   hashed asset filenames (`./assets/index-<hash>.js`) that change on every
+   build — don't hardcode those; only the four `assets/*` static files and
+   `.nojekyll` are guaranteed to keep stable names.
 
 ## Regenerating the GIF
 
 Build it outside the repo (a scratch/tmp dir), then copy the rendered file
-into `pages/card-cycle.gif` — don't run `hyperframes init` inside the repo
+into `assets/card-cycle.gif` — don't run `hyperframes init` inside the repo
 itself.
 
 Requires the `hyperframes` CLI (`npx hyperframes doctor` to check
@@ -231,16 +249,16 @@ color constants swapped:
 
 The outer page background in each case is matched to GitHub's *actual*
 canvas color for that theme (`#ffffff` light / `#0d1117` dark) rather than
-`index.html`'s own `--bg` tokens (`#f6f7f9` / `#0b0d12`) — this is what
-lets each GIF blend into the README with no visible edge on github.com,
-regardless of the visitor's GitHub theme. The card colors themselves reuse
-`index.html`'s own `:root` tokens (light and dark blocks respectively) —
-only the outer canvas is GitHub-matched, not the whole palette.
-Both the GIF pair and the `banner.svg`/`banner-dark.svg` pair are shared
-assets: `pages/index.html`'s `#projects` hero theme-switches on the
-visitor's OS/browser preference (its own `<picture>` sources), and
-`README.md` theme-switches on the visitor's GitHub UI theme (its own
-separate `<picture>` sources) — same two files, two independent switches.
+`site/src/theme.css`'s own `--bg` tokens (`#f6f7f9` / `#0b0d12`) — this is
+what lets each GIF blend into the README with no visible edge on
+github.com, regardless of the visitor's GitHub theme. The card colors
+themselves reuse `theme.css`'s own `:root` tokens (light and dark blocks
+respectively) — only the outer canvas is GitHub-matched, not the whole
+palette. Both the GIF pair and the `banner.svg`/`banner-dark.svg` pair are
+shared assets: `site/`'s `#projects` hero theme-switches on the visitor's
+OS/browser preference (its own `<picture>` sources), and `README.md`
+theme-switches on the visitor's GitHub UI theme (its own separate
+`<picture>` sources) — same two files, two independent switches.
 Regenerate both GIFs (and both banner SVGs) from one shared
 composition/template, swapping only the color constants between runs, so
 the pair never drifts into different layouts or timing from each other.
@@ -260,9 +278,9 @@ render --resolution` only accepts a fixed preset list (`landscape`,
 which match this composition's ~11:3 aspect ratio, so there is no
 flag-only path to 2x here. Bake the doubled pixel values into the
 composition itself instead. Where the GIF is *displayed* (`README.md`'s
-`<img width height>`, or `pages/index.html`'s CSS `max-width`) is what
-constrains it back down to the intended on-screen size — see the
-`<picture>` block above and the "Canvas" note below.
+`<img width height>`, or `site/`'s CSS `max-width`) is what constrains it
+back down to the intended on-screen size — see the `<picture>` block above
+and the "Canvas" note below.
 
 **Canvas**: 1760×480 at `K=3` (528px-wide card slots, 48px outer padding,
 40px gaps — same row math as `banner.svg`'s two-up layout doubled, just
@@ -334,8 +352,8 @@ a project that isn't one of the 3 visible cards.
 **Card markup** (per project, inside its `.clip`): a small accent top-bar,
 a 72px `.icon-chip` with the project's emoji, `.card-title` (30px),
 one-line `.card-desc` (22px), and up to 2 `.tag` pills (19px) — same
-visual language as `index.html`'s cards (at half these sizes), scaled up
-2x to fit a 528×400 slot.
+visual language as `site/`'s cards (at half these sizes), scaled up 2x to
+fit a 528×400 slot.
 
 **Build, lint, inspect, render — once per theme.** Build one composition
 (light colors), verify it, render it, then copy the same file and
@@ -350,7 +368,7 @@ npx hyperframes lint "$WORKDIR"      # benign: "overlapping_gsap_tweens" warning
 npx hyperframes inspect "$WORKDIR"   # must be 0 issues — the allow-occlusion/allow-overlap attributes should clear it
 npx hyperframes render "$WORKDIR" --format gif --fps 15 --gif-loop 0 \
   -o "$WORKDIR/renders/card-cycle.gif"
-cp "$WORKDIR/renders/card-cycle.gif" pages/card-cycle.gif
+cp "$WORKDIR/renders/card-cycle.gif" assets/card-cycle.gif
 
 DARKDIR="$(mktemp -d)/card-cycle-dark"
 cp -r "$WORKDIR"/. "$DARKDIR"
@@ -360,7 +378,7 @@ npx hyperframes lint "$DARKDIR"
 npx hyperframes inspect "$DARKDIR"
 npx hyperframes render "$DARKDIR" --format gif --fps 15 --gif-loop 0 \
   -o "$DARKDIR/renders/card-cycle-dark.gif"
-cp "$DARKDIR/renders/card-cycle-dark.gif" pages/card-cycle-dark.gif
+cp "$DARKDIR/renders/card-cycle-dark.gif" assets/card-cycle-dark.gif
 ```
 
 Sanity-check each with `npx hyperframes snapshot "$DIR" -o "$DIR/snapshots" --at <comma-separated-seconds>`
@@ -369,4 +387,4 @@ loop point (`t=0` vs `t=D`) is visually identical, and check a
 mid-transition timestamp (e.g. `HOLD + TRANS/2` of the first cycle) to
 confirm the wrap crossing reads as a soft shuffle, not a hard glitch. Do
 this for both the light and dark render before copying either into
-`pages/`.
+`assets/`.
