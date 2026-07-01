@@ -29,11 +29,14 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   let pendingImage: File | null = null;
   let hasOpenedOnce = false;
 
-  const fab = document.createElement('button');
-  fab.className = 'chat-fab';
-  fab.setAttribute('aria-label', 'Open AI assistant chat');
-  fab.textContent = '💬';
-  document.body.appendChild(fab);
+  const fabWrap = document.createElement('div');
+  fabWrap.className = 'chat-fab-wrap';
+  fabWrap.innerHTML = `
+    <span class="chat-fab-tooltip">Ask about this profile</span>
+    <button class="chat-fab" aria-label="Open AI assistant chat">💬</button>
+  `;
+  document.body.appendChild(fabWrap);
+  const fab = fabWrap.querySelector('.chat-fab') as HTMLButtonElement;
 
   const panel = document.createElement('aside');
   panel.className = 'chat-panel';

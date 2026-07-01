@@ -4,7 +4,7 @@ export function renderProjects(profile: Profile): HTMLElement {
   const section = document.createElement('section');
   section.id = 'projects';
 
-  const { banner, cardCycle } = profile.hero;
+  const { cardCycle } = profile.hero;
 
   const cardsHtml = profile.projects
     .map((project) => {
@@ -31,10 +31,6 @@ export function renderProjects(profile: Profile): HTMLElement {
     <h2>A few things I'm building</h2>
 
     <div class="hero">
-      <picture>
-        <source srcset="${banner.dark}" media="(prefers-color-scheme: dark)" />
-        <img class="hero-banner" src="${banner.light}" alt="${banner.alt}" loading="lazy" />
-      </picture>
       <picture>
         <source srcset="${cardCycle.dark}" media="(prefers-color-scheme: dark)" />
         <img class="hero-gif" src="${cardCycle.light}" alt="${cardCycle.alt}" loading="lazy" width="${cardCycle.width}" height="${cardCycle.height}" />

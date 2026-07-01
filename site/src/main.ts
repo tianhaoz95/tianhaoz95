@@ -6,6 +6,7 @@ import { renderSkills } from './sections/skills';
 import { renderProjects } from './sections/projects';
 import { renderContact } from './sections/contact';
 import { initChatSidebar } from './chat/session';
+import { initScrollSpy } from './scrollSpy';
 
 function renderFooter(): HTMLElement {
   const footer = document.createElement('footer');
@@ -27,6 +28,8 @@ function main() {
   page.appendChild(renderContact(profile));
   page.appendChild(renderFooter());
   app.appendChild(page);
+
+  initScrollSpy();
 
   // Wires up the chat FAB's click listener only — no model download happens
   // until the user actually opens the panel.
