@@ -10,12 +10,17 @@ static project-cards gallery to GitHub Pages via
 `.github/workflows/deploy-pages.yml`, which uploads `pages/` as the Pages
 artifact on every push that touches `pages/**`.
 
-Three artifacts hold the actual content and must stay in sync:
+`pages/index.html` is a full developer-profile page (`.site-nav` +
+`#about` + `#skills` + `#projects` + `#contact`, in that order) — **this
+skill only owns the `#projects` section.** Don't touch `.site-nav`,
+`#about`, `#skills`, or `#contact` when running this skill; those are a
+separate concern (bio, tech-stack tags, social links) with no per-project
+data in them. Three artifacts make up the `#projects` section and must
+stay in sync:
 
-- `pages/index.html` — the full cards gallery (one card per project), plus a
-  `.hero` block near the top, headed "Highlighted Projects", that stacks
-  `banner.svg` above `card-cycle.gif` as a compact preview of the same
-  cards.
+- The `#projects` section of `pages/index.html` — a `.hero` block (stacks
+  `banner.svg` above `card-cycle.gif` as a compact preview) followed by
+  the full `.grid` of one `.card` per project.
 - `pages/banner.svg` — a static two-card-per-row preview of every project
   card, shown in the `.hero` block above the GIF.
 - `pages/card-cycle.gif` — a looping animation (880×240 at 3 projects) that
@@ -81,15 +86,20 @@ Projects live as git submodules under `./projects/*` (declared in
    changed fields (description, links, image) for existing ones, and remove
    cards for projects no longer under `./projects`.
 
-4. **Regenerate `pages/index.html`.** Reuse the existing CSS classes and
-   card markup structure (`.card`, `.card-media`, `.card-body`,
-   `.card-title`, `.card-desc`, `.tags`/`.tag`, `.hero`, `.hero-label`,
-   `.hero-banner`, `.hero-gif`) — don't restyle the page.
-   `.card-media.icon-only` is for projects whose only available image is a
-   small icon/favicon rather than a screenshot. The `.hero` block's
-   `src="banner.svg"` / `src="card-cycle.gif"` paths don't change; only
-   their `alt` text needs updating if the project list changed (list every
-   project name in the alt text).
+4. **Regenerate only the `#projects` section of `pages/index.html`.** Leave
+   `.site-nav`, `#about`, `#skills`, and `#contact` untouched — they hold
+   bio/skills/social content with nothing project-specific in them. Within
+   `#projects`, reuse the existing CSS classes and markup structure
+   (`.section-label`, `.hero`, `.hero-banner`, `.hero-gif`, `.grid`,
+   `.card`, `.card-media`, `.card-body`, `.card-title`, `.card-desc`,
+   `.tags`/`.tag`) — don't restyle the page. `.card-media.icon-only` is for
+   projects whose only available image is a small icon/favicon rather than
+   a screenshot. The `.hero` block's `src="banner.svg"` / `src="card-cycle.gif"`
+   paths don't change; only their `alt` text needs updating if the project
+   list changed (list every project name in the alt text). If a new
+   project's tech stack is a real addition to what's already covered in
+   `#skills`, flag it to the user — this skill doesn't edit `#skills`
+   itself, but stale skill tags are worth surfacing.
 
 5. **Regenerate `pages/banner.svg`** to match the same set of cards in the
    same compact two-card-per-row layout. If there are more than 2 projects,
