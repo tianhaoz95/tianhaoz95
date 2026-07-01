@@ -20,6 +20,7 @@ export function renderProjects(profile: Profile): HTMLElement {
             <div class="tags">
               ${project.tags.map((tag) => `<span class="tag">${tag}</span>`).join('\n')}
             </div>
+            <span class="card-link">View on GitHub <span class="card-link-arrow">→</span></span>
           </div>
         </a>
       `;

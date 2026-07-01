@@ -2,7 +2,7 @@ export function renderNav(): HTMLElement {
   const nav = document.createElement('nav');
   nav.className = 'site-nav';
   nav.innerHTML = `
-    <a class="brand" href="#about">Tianhao Zhou</a>
+    <a class="brand" href="#about"><span class="brand-mark">TZ</span>Tianhao Zhou</a>
     <div class="links">
       <a href="#about">About</a>
       <a href="#skills">Skills</a>

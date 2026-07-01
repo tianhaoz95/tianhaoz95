@@ -12,6 +12,7 @@ export function renderSkills(profile: Profile): HTMLElement {
         .map(
           (group) => `
         <div class="skill-group">
+          <span class="skill-icon">${group.icon}</span>
           <h3>${group.title}</h3>
           <div class="tags">
             ${group.tags.map((tag) => `<span class="tag">${tag}</span>`).join('\n')}

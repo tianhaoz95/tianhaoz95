@@ -1,4 +1,5 @@
 export interface SkillGroup {
+  icon: string;
   title: string;
   tags: string[];
 }
@@ -14,6 +15,7 @@ export interface Project {
 }
 
 export interface ContactLink {
+  icon: string;
   label: string;
   href: string;
 }
@@ -45,18 +47,22 @@ export const profile: Profile = {
   ],
   skillGroups: [
     {
+      icon: '🛠️',
       title: 'Systems & backend',
       tags: ['Node.js', 'Express', 'WebSockets', 'PTY / terminals'],
     },
     {
+      icon: '🧠',
       title: 'Browser AI & ML',
       tags: ['Transformers.js', 'MediaPipe', 'Tesseract.js (OCR)', 'on-device inference'],
     },
     {
+      icon: '🎨',
       title: 'Frontend',
       tags: ['TypeScript', 'Astro', 'Vite'],
     },
     {
+      icon: '☁️',
       title: 'Infra & hosting',
       tags: ['Firebase', 'GitHub Actions', 'GitHub Pages'],
     },
@@ -106,13 +112,13 @@ export const profile: Profile = {
     },
   ],
   contactLinks: [
-    { label: 'GitHub', href: 'https://github.com/tianhaoz95' },
-    { label: 'Email', href: 'mailto:jacksonzhou666@gmail.com' },
-    { label: 'Twitter', href: 'https://twitter.com/TheSWE2' },
-    { label: 'Medium', href: 'https://medium.com/@tianhaozhou' },
-    { label: 'YouTube', href: 'https://www.youtube.com/channel/UCY13XGU7-3mYz2n1NzV4oGw' },
-    { label: 'Reddit', href: 'https://www.reddit.com/user/jacksonz666/' },
-    { label: 'Twitch', href: 'https://www.twitch.tv/jacksonzhou666' },
+    { icon: '🐙', label: 'GitHub', href: 'https://github.com/tianhaoz95' },
+    { icon: '✉️', label: 'Email', href: 'mailto:jacksonzhou666@gmail.com' },
+    { icon: '🐦', label: 'Twitter', href: 'https://twitter.com/TheSWE2' },
+    { icon: '✍️', label: 'Medium', href: 'https://medium.com/@tianhaozhou' },
+    { icon: '▶️', label: 'YouTube', href: 'https://www.youtube.com/channel/UCY13XGU7-3mYz2n1NzV4oGw' },
+    { icon: '👽', label: 'Reddit', href: 'https://www.reddit.com/user/jacksonz666/' },
+    { icon: '🎮', label: 'Twitch', href: 'https://www.twitch.tv/jacksonzhou666' },
   ],
   hero: {
     banner: {
