@@ -26,6 +26,6 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
     <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
-    <img alt="Projects" src="pages/card-cycle.gif">
+    <img alt="Projects" src="pages/card-cycle.gif" width="880" height="240">
   </picture>
 </a>

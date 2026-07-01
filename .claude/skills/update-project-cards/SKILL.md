@@ -24,17 +24,19 @@ stay in sync:
 - `pages/banner.svg` — a static two-card-per-row preview of every project
   card, shown in the `.hero` block above the GIF.
 - `pages/card-cycle.gif` (light) and `pages/card-cycle-dark.gif` (dark) —
-  the same looping animation (880×240 at 3 projects, project cards side by
-  side, periodically shuffling positions in a seamless cyclic rotation —
-  the loop point is invisible) rendered twice, once per theme. This is
-  what keeps the gallery usable in a small footprint as the project count
-  grows — it's the only artifact that scales by *time* (shuffling through
-  more cards than fit on screen at once) rather than *space* (a grid that
-  keeps getting taller). Generated with the `hyperframes` CLI (a
-  `motion-graphics`-style composition) — see "Regenerating the GIF" below.
-  **Both light and dark variants must be regenerated together** — never
-  update one without the other, or `README.md`'s theme switch (below) will
-  show a stale frame in whichever theme wasn't touched.
+  the same looping animation (rendered at 1760×480 pixels — 2x a logical
+  880×240 design, for retina sharpness; see "Rendering at 2x" below —
+  showing 3 projects side by side, periodically shuffling positions in a
+  seamless cyclic rotation, the loop point invisible) rendered twice, once
+  per theme. This is what keeps the gallery usable in a small footprint as
+  the project count grows — it's the only artifact that scales by *time*
+  (shuffling through more cards than fit on screen at once) rather than
+  *space* (a grid that keeps getting taller). Generated with the
+  `hyperframes` CLI (a `motion-graphics`-style composition) — see
+  "Regenerating the GIF" below. **Both light and dark variants must be
+  regenerated together** — never update one without the other, or
+  `README.md`'s theme switch (below) will show a stale frame in whichever
+  theme wasn't touched.
 
 `README.md` embeds both GIFs via a `<picture>` element with
 `prefers-color-scheme` sources, switching on the visitor's GitHub theme
@@ -47,7 +49,7 @@ GIF" for why the two surfaces intentionally differ):
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="pages/card-cycle-dark.gif">
     <source media="(prefers-color-scheme: light)" srcset="pages/card-cycle.gif">
-    <img alt="Projects" src="pages/card-cycle.gif">
+    <img alt="Projects" src="pages/card-cycle.gif" width="880" height="240">
   </picture>
 </a>
 ```
@@ -57,7 +59,11 @@ Both `srcset`/`src` paths are **relative**, not the deployed
 resolves to the committed file the instant it's pushed, with no
 dependency on the Pages deploy workflow finishing first — the link
 *destination* (which does point at the deployed site) is unaffected
-either way.
+either way. The `<img>`'s `width="880" height="240"` attributes are
+required, not decorative — the GIF files are actually 1760×480 (2x, for
+retina; see "Rendering at 2x" below), and without an explicit size markdown
+renders images at their native pixel dimensions as CSS pixels, which would
+make the banner display twice the intended size.
 
 Projects live as git submodules under `./projects/*` (declared in
 `.gitmodules`).
@@ -199,29 +205,49 @@ switches, via the `<picture>` element described earlier. Regenerate both
 GIFs from one shared composition file, swapping only the color constants
 between runs, so they never drift into different layouts or timing.
 
-**Canvas**: 880×240 at `K=3` (264px-wide card slots, 24px outer padding,
-20px gaps — same row math as `banner.svg`'s two-up layout, just three-up).
-For `K=2` use the `banner.svg` two-card geometry (404px slots) at a
-shorter, squarer canvas; for `K=1` it degenerates to the old single-card
-cycle (see git history before this section was rewritten, if ever needed
-again).
+**Rendering at 2x for retina.** The composition is authored and rendered
+at exactly **2x** a logical 880×240 / `K=3` design — 1760×480 actual
+canvas, 528px-wide card slots (2x logical 264px), 48px outer padding (2x
+24px), 40px gaps (2x 20px), fonts/borders/radii all doubled too (see "Card
+markup" below for the doubled values). Every distance in the JS timeline
+(`SLOTS`, the `x` deltas) is likewise 2x the logical design. This exists
+purely to avoid blur on Retina/HiDPI screens: a naively-rendered 1x GIF
+gets upscaled by the browser on any high-density display, which is what
+"low resolution" GIF complaints usually are. Do **not** render at the
+logical 1x size and rely on `--resolution` to upscale — `hyperframes
+render --resolution` only accepts a fixed preset list (`landscape`,
+`portrait`, `square`, etc. — see `hyperframes render --help`), none of
+which match this composition's ~11:3 aspect ratio, so there is no
+flag-only path to 2x here. Bake the doubled pixel values into the
+composition itself instead. Where the GIF is *displayed* (`README.md`'s
+`<img width height>`, or `pages/index.html`'s CSS `max-width`) is what
+constrains it back down to the intended on-screen size — see the
+`<picture>` block above and the "Canvas" note below.
+
+**Canvas**: 1760×480 at `K=3` (528px-wide card slots, 48px outer padding,
+40px gaps — same row math as `banner.svg`'s two-up layout doubled, just
+three-up). For `K=2` use the `banner.svg` two-card geometry (404px slots,
+also doubled if regenerating fresh) at a shorter, squarer canvas; for
+`K=1` it degenerates to the old single-card cycle (see git history before
+this section was rewritten, if ever needed again).
 
 **`K=3` is a pure cyclic rotation — the common case for ≤3 projects.**
-Slot left-edges: `SLOTS = [24, 308, 592]`. Each card's CSS `left` is fixed
-to its home slot (cycle 0 position); everything else is a GSAP `x`
+Slot left-edges: `SLOTS = [48, 616, 1184]`. Each card's CSS `left` is
+fixed to its home slot (cycle 0 position); everything else is a GSAP `x`
 (translateX) offset from home. Every cycle, every card advances one slot
 to the right, wrapping the rightmost card back to the leftmost — after
 exactly 3 cycles every card is back at its slot-0 position, so the loop
 point is bit-for-bit identical to `t=0` and the GIF loops with no visible
 seam. `HOLD = 1.8s`, `TRANS = 0.6s`, `SEG = HOLD+TRANS = 2.4s`, total
-duration `D = 3*SEG = 7.2s`.
+duration `D = 3*SEG = 7.2s` (timing is unaffected by the 2x pixel scale —
+only spatial values double, never durations/opacity/scale/z-index).
 
 For card `c` with home slot `h_c` (0, 1, or 2), its `x` delta at cycle `k`
 (0, 1, 2) is `SLOTS[(h_c + k) % 3] - SLOTS[h_c]`. Each transition starts at
 `t = k*SEG + HOLD` and tweens to the next cycle's deltas:
 
 ```js
-const SLOTS = [24, 308, 592];
+const SLOTS = [48, 616, 1184];
 const HOLD = 1.8, TRANS = 0.6, SEG = HOLD + TRANS;
 // deltasFor(homeSlot) -> [cycle0, cycle1, cycle2] x-offsets from home
 const deltasFor = (h) => [0, 1, 2].map((k) => SLOTS[(h + k) % 3] - SLOTS[h]);
@@ -266,10 +292,10 @@ the closed 3-card rotation above unmodified for `N>3`; it has no concept of
 a project that isn't one of the 3 visible cards.
 
 **Card markup** (per project, inside its `.clip`): a small accent top-bar,
-a 36px `.icon-chip` with the project's emoji, `.card-title` (15px),
-one-line `.card-desc` (11px), and up to 2 `.tag` pills (9.5px) — same
-visual language as `index.html`'s cards, scaled down to fit a 264×200
-slot.
+a 72px `.icon-chip` with the project's emoji, `.card-title` (30px),
+one-line `.card-desc` (22px), and up to 2 `.tag` pills (19px) — same
+visual language as `index.html`'s cards (at half these sizes), scaled up
+2x to fit a 528×400 slot.
 
 **Build, lint, inspect, render — once per theme.** Build one composition
 (light colors), verify it, render it, then copy the same file and
