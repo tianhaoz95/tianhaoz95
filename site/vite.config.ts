@@ -17,6 +17,13 @@ const pagesDir = resolve(__dirname, '../pages');
 // WebGPU first and single-threaded WASM as a fallback specifically so it
 // doesn't depend on cross-origin isolation for multi-threaded WASM.
 export default defineConfig({
+  // This is a GitHub Pages *project* page, served at
+  // https://tianhaoz95.github.io/tianhaoz95/ (a subpath), not the domain
+  // root. Vite's default base ("/") emits root-absolute asset URLs
+  // (/assets/...), which 404 under a subpath deploy — use a relative base
+  // so built references resolve correctly regardless of where the site is
+  // actually mounted.
+  base: './',
   publicDir: pagesDir,
   build: {
     outDir: resolve(__dirname, 'dist'),
