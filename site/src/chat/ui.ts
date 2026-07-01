@@ -9,16 +9,26 @@ export interface StreamHandle {
   finish: () => void;
 }
 
+export interface StatusFile {
+  name: string;
+  loaded: number;
+  total: number;
+}
+
+export interface StatusInfo {
+  state: 'idle' | 'loading' | 'ready' | 'error';
+  progress?: number;
+  loaded?: number;
+  total?: number;
+  files?: StatusFile[];
+  error?: string;
+}
+
 export interface ChatUIController {
   appendUserMessage: (text: string, imageFile: File | null) => void;
   beginAssistantMessage: () => StreamHandle;
   appendSystemNote: (text: string) => void;
-  setStatus: (
-    kind: 'text' | 'vision',
-    state: 'idle' | 'loading' | 'ready' | 'error',
-    progress?: number,
-    label?: string,
-  ) => void;
+  setStatus: (kind: 'text' | 'vision', info: StatusInfo) => void;
   setBusy: (busy: boolean) => void;
   setInputPlaceholder: (text: string) => void;
   clearImagePreview: () => void;
@@ -26,6 +36,19 @@ export interface ChatUIController {
 }
 
 const DEFAULT_PLACEHOLDER = 'Ask about skills, projects, or contact info…';
+
+function formatBytes(bytes: number): string {
+  if (!bytes || bytes <= 0) return '0 MB';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  const decimals = unitIndex > 0 && value < 100 ? 1 : 0;
+  return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+}
 
 export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   let pendingImage: File | null = null;
@@ -51,8 +74,14 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
       <button class="chat-close" aria-label="Close chat">✕</button>
     </div>
     <div class="chat-status">
-      <span class="chat-status-label"></span>
+      <div class="chat-status-head">
+        <span class="chat-status-dot" aria-hidden="true"></span>
+        <span class="chat-status-label"></span>
+        <span class="chat-status-percent"></span>
+      </div>
       <div class="chat-status-bar"><div class="chat-status-bar-fill"></div></div>
+      <div class="chat-status-bytes"></div>
+      <div class="chat-status-files"></div>
     </div>
     <div class="chat-messages"></div>
     <div class="chat-footer">
@@ -79,7 +108,10 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   const closeBtn = panel.querySelector('.chat-close') as HTMLButtonElement;
   const statusEl = panel.querySelector('.chat-status') as HTMLDivElement;
   const statusLabel = panel.querySelector('.chat-status-label') as HTMLSpanElement;
+  const statusPercent = panel.querySelector('.chat-status-percent') as HTMLSpanElement;
   const statusBarFill = panel.querySelector('.chat-status-bar-fill') as HTMLDivElement;
+  const statusBytes = panel.querySelector('.chat-status-bytes') as HTMLDivElement;
+  const statusFiles = panel.querySelector('.chat-status-files') as HTMLDivElement;
   const imagePreview = panel.querySelector('.chat-image-preview') as HTMLDivElement;
   const imagePreviewImg = panel.querySelector('.chat-image-preview img') as HTMLImageElement;
   const imagePreviewName = panel.querySelector('.chat-image-name') as HTMLSpanElement;
@@ -138,6 +170,29 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
+  function renderStatusFiles(files: StatusFile[]) {
+    statusFiles.innerHTML = '';
+    for (const file of files) {
+      const pct = file.total > 0 ? Math.round((file.loaded / file.total) * 100) : 0;
+      const done = pct >= 100;
+
+      const row = document.createElement('div');
+      row.className = done ? 'chat-status-file done' : 'chat-status-file';
+      row.style.setProperty('--file-pct', `${pct}%`);
+
+      const name = document.createElement('span');
+      name.className = 'chat-status-file-name';
+      name.textContent = file.name;
+
+      const percent = document.createElement('span');
+      percent.className = 'chat-status-file-percent';
+      percent.textContent = done ? '✓' : `${pct}%`;
+
+      row.append(name, percent);
+      statusFiles.appendChild(row);
+    }
+  }
+
   const controller: ChatUIController = {
     appendUserMessage(text, imageFile) {
       const el = document.createElement('div');
@@ -176,22 +231,37 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
       messagesEl.appendChild(el);
       scrollToBottom();
     },
-    setStatus(kind, state, progress, label) {
+    setStatus(kind, info) {
+      const { state } = info;
       if (state === 'idle') {
         statusEl.classList.remove('visible');
         return;
       }
+
       statusEl.classList.add('visible');
+      statusEl.classList.remove('loading', 'ready', 'error');
+      statusEl.classList.add(state);
+
       const prefix = kind === 'text' ? 'Assistant model' : 'Image model';
+
       if (state === 'loading') {
-        statusLabel.textContent = label ? `${prefix}: ${label}` : `${prefix}: loading…`;
-        statusBarFill.style.width = `${Math.round((progress ?? 0) * 100)}%`;
+        const pct = Math.round(info.progress ?? 0);
+        statusLabel.textContent = `${prefix} — downloading`;
+        statusPercent.textContent = `${pct}%`;
+        statusBarFill.style.width = `${pct}%`;
+        statusBytes.textContent =
+          info.total && info.total > 0 ? `${formatBytes(info.loaded ?? 0)} / ${formatBytes(info.total)}` : '';
+        renderStatusFiles(info.files ?? []);
       } else if (state === 'ready') {
-        statusLabel.textContent = `${prefix}: ready`;
+        statusLabel.textContent = `${prefix} — ready`;
+        statusPercent.textContent = '100%';
         statusBarFill.style.width = '100%';
+        statusBytes.textContent = '';
+        statusFiles.innerHTML = '';
         setTimeout(() => statusEl.classList.remove('visible'), 1200);
       } else if (state === 'error') {
-        statusLabel.textContent = `${prefix}: failed to load`;
+        statusLabel.textContent = `${prefix} — failed to load`;
+        statusPercent.textContent = '';
       }
     },
     setBusy(busy) {

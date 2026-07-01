@@ -28,8 +28,8 @@ function createTextWorker(ui: ChatUIController): Promise<void> {
     textWorker.onmessage = (e: MessageEvent) => {
       const { type } = e.data;
       if (type === 'status') {
-        const { state, progress, file, error } = e.data;
-        ui.setStatus('text', state, progress, file);
+        const { state, progress, loaded, total, files, error } = e.data;
+        ui.setStatus('text', { state, progress, loaded, total, files, error });
         if (state === 'ready') {
           textReady = true;
           resolve();
@@ -49,8 +49,8 @@ function createVisionWorker(ui: ChatUIController): Promise<void> {
     visionWorker.onmessage = (e: MessageEvent) => {
       const { type } = e.data;
       if (type === 'status') {
-        const { state, progress, file, error } = e.data;
-        ui.setStatus('vision', state, progress, file);
+        const { state, progress, loaded, total, files, error } = e.data;
+        ui.setStatus('vision', { state, progress, loaded, total, files, error });
         if (state === 'ready') {
           visionReady = true;
           resolve();

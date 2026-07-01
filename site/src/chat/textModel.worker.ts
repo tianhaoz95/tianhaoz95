@@ -1,4 +1,5 @@
 import { pipeline, env, TextStreamer, type TextGenerationPipeline } from '@huggingface/transformers';
+import { createProgressAggregator } from './progress';
 
 // Disable local models fallback — always fetch from the HF hub.
 env.allowLocalModels = false;
@@ -23,6 +24,8 @@ interface ProgressData {
   status: string;
   progress?: number;
   file?: string;
+  loaded?: number;
+  total?: number;
 }
 
 self.onmessage = async (e: MessageEvent) => {
@@ -30,16 +33,13 @@ self.onmessage = async (e: MessageEvent) => {
 
   if (type === 'init') {
     try {
-      self.postMessage({ type: 'status', state: 'loading', progress: 0 });
+      self.postMessage({ type: 'status', state: 'loading', progress: 0, loaded: 0, total: 0, files: [] });
 
+      const aggregator = createProgressAggregator();
       const progress_callback = (progressData: ProgressData) => {
         if (progressData.status === 'progress') {
-          self.postMessage({
-            type: 'status',
-            state: 'loading',
-            progress: progressData.progress,
-            file: progressData.file,
-          });
+          const agg = aggregator.update(progressData.file ?? '', progressData.loaded ?? 0, progressData.total ?? 0);
+          self.postMessage({ type: 'status', state: 'loading', ...agg });
         }
       };
 
