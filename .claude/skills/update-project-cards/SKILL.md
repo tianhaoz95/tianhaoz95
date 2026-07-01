@@ -140,12 +140,15 @@ fixed slots shown at once (never more, to keep the footprint constant);
 fewer if there are under 3 projects. Every project card is always visible
 at `K = 3`; the "shuffle" is a position swap, not a content swap. Light
 theme only (no `prefers-color-scheme` support — it's a static GIF;
-`index.html` itself still auto-switches), reusing `index.html`'s `:root`
-light-mode tokens: `--bg:#f6f7f9 --card-bg:#ffffff --border:#e3e6ec
+`index.html` itself still auto-switches). Card colors reuse `index.html`'s
+`:root` light-mode tokens: `--card-bg:#ffffff --border:#e3e6ec
 --text:#1a1d24 --muted:#5b6472 --accent:#3b5bdb
---tag-bg:rgba(59,91,219,0.08) --tag-border:rgba(59,91,219,0.25)`.
-`pages/banner.svg` uses the same light tokens — both static assets should
-always share one palette, even though `index.html` itself adapts to the
+--tag-bg:rgba(59,91,219,0.08) --tag-border:rgba(59,91,219,0.25)`. The
+outer page background is `#ffffff` (not `index.html`'s `--bg:#f6f7f9`) —
+matched to GitHub's actual light-theme canvas color so the GIF blends into
+the README with no visible edge when it renders on github.com.
+`pages/banner.svg` uses the same card palette — both static assets should
+always share one look, even though `index.html` itself adapts to the
 visitor's system theme.
 
 **Canvas**: 880×240 at `K=3` (264px-wide card slots, 24px outer padding,
