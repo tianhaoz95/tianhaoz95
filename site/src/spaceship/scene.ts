@@ -1,6 +1,7 @@
 import {
   Color3,
   Color4,
+  Constants,
   Engine,
   GlowLayer,
   HemisphericLight,
@@ -10,7 +11,8 @@ import {
   StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
-import { paintStarfield } from './textures';
+import { paintFlareTexture, paintStarfield } from './textures';
+import { themeColorHex } from './themeColors';
 
 export interface SceneRig {
   engine: Engine;
@@ -63,6 +65,27 @@ export function createSceneRig(host: HTMLElement): SceneRig {
   skyMat.backFaceCulling = false;
   skyMat.emissiveTexture = paintStarfield(scene);
   skybox.material = skyMat;
+
+  // A distant glowing nebula core, the reference image's centerpiece — a
+  // camera-facing billboard, additively blended so it reads as pure glow
+  // rather than a flat sprite, anchored to a fixed *world* direction via
+  // infiniteDistance (same trick as the skybox) so it never gets closer as
+  // the ship flies toward it, but does drift across the window as the ship
+  // turns — like a real distant light source would.
+  const flare = MeshBuilder.CreatePlane('spaceship-flare', { size: 160 }, scene);
+  flare.position.set(120, 40, 820);
+  flare.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  flare.infiniteDistance = true;
+  flare.isPickable = false;
+  const flareMat = new StandardMaterial('spaceship-flare-mat', scene);
+  flareMat.disableLighting = true;
+  flareMat.backFaceCulling = false;
+  flareMat.alphaMode = Constants.ALPHA_ADD;
+  const flareTexture = paintFlareTexture(scene, themeColorHex('--accent-2', '#06b6d4'), '#d946ef');
+  flareMat.emissiveTexture = flareTexture;
+  flareMat.opacityTexture = flareTexture;
+  flare.material = flareMat;
+  glow.addIncludedOnlyMesh(flare);
 
   function resize() {
     engine.resize();

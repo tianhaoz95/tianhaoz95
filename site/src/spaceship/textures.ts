@@ -158,6 +158,160 @@ export function paintAccretionDiskTexture(scene: Scene, accentA: string, accentB
   });
 }
 
+export type HudScreenVariant = 'radar' | 'bars' | 'wave' | 'grid' | 'gauge';
+
+/**
+ * Small embedded "console screen" readouts — the cyberpunk reference this
+ * pass is styled after is full of these (radar sweeps, equalizer bars,
+ * data grids) scattered across the dashboard/header/pillars. Content is
+ * decorative noise, not real telemetry — the point is visual density, in
+ * the same "generate it, don't ship an asset" spirit as every other
+ * texture in this file.
+ */
+export function paintHudScreen(scene: Scene, variant: HudScreenVariant, accentHex: string): DynamicTexture {
+  return makeTexture(`spaceship-hud-${variant}-${Math.random().toString(36).slice(2)}`, scene, 256, (ctx, size) => {
+    ctx.fillStyle = '#050914';
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.strokeStyle = accentHex;
+    ctx.fillStyle = accentHex;
+    ctx.lineWidth = 2;
+
+    if (variant === 'radar') {
+      const cx = size / 2;
+      const cy = size / 2;
+      ctx.globalAlpha = 0.45;
+      for (let r = size * 0.12; r < size * 0.46; r += size * 0.11) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(cx, size * 0.06);
+      ctx.lineTo(cx, size * 0.94);
+      ctx.moveTo(size * 0.06, cy);
+      ctx.lineTo(size * 0.94, cy);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      const sweep = Math.random() * Math.PI * 2;
+      const sweepGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.46);
+      sweepGradient.addColorStop(0, accentHex);
+      sweepGradient.addColorStop(1, 'transparent');
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(sweep);
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = sweepGradient;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, size * 0.46, -0.35, 0.35);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.globalAlpha = 1;
+      for (let i = 0; i < 5; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random() * size * 0.38 + size * 0.05;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (variant === 'bars') {
+      const bars = 9;
+      const gap = size * 0.03;
+      const bw = (size * 0.86) / bars - gap;
+      for (let i = 0; i < bars; i++) {
+        const h = Math.random() * size * 0.6 + size * 0.12;
+        const x = size * 0.07 + i * (bw + gap);
+        ctx.globalAlpha = 0.55 + Math.random() * 0.4;
+        ctx.fillRect(x, size * 0.9 - h, bw, h);
+      }
+      ctx.globalAlpha = 1;
+    } else if (variant === 'wave') {
+      const phase = Math.random() * Math.PI * 2;
+      ctx.beginPath();
+      for (let x = 0; x <= size; x += 4) {
+        const y = size / 2 + Math.sin(x * 0.045 + phase) * size * 0.16 + Math.sin(x * 0.11 + phase) * size * 0.05;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 0.2;
+      ctx.lineWidth = 1;
+      for (let gx = size * 0.1; gx < size; gx += size / 7) {
+        ctx.beginPath();
+        ctx.moveTo(gx, size * 0.1);
+        ctx.lineTo(gx, size * 0.9);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    } else if (variant === 'grid') {
+      const cols = 6;
+      const rows = 6;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (Math.random() > 0.4) {
+            ctx.globalAlpha = Math.random() * 0.55 + 0.2;
+            ctx.fillRect(
+              size * 0.08 + c * ((size * 0.84) / cols),
+              size * 0.08 + r * ((size * 0.84) / rows),
+              ((size * 0.84) / cols) * 0.75,
+              ((size * 0.84) / rows) * 0.75,
+            );
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    } else if (variant === 'gauge') {
+      const cx = size / 2;
+      const cy = size * 0.62;
+      const radius = size * 0.36;
+      ctx.lineWidth = size * 0.055;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, Math.PI, 0);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      const pct = 0.25 + Math.random() * 0.65;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, Math.PI, Math.PI + Math.PI * pct);
+      ctx.stroke();
+    }
+
+    // A frame border and CRT-style scanlines tie every variant together.
+    ctx.globalAlpha = 0.8;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = accentHex;
+    ctx.strokeRect(2, 2, size - 4, size - 4);
+    ctx.globalAlpha = 0.06;
+    ctx.fillStyle = '#ffffff';
+    for (let y = 0; y < size; y += 4) ctx.fillRect(0, y, size, 1);
+    ctx.globalAlpha = 1;
+  });
+}
+
+/** A soft glowing disc for a distant "sun"/nebula-core light source seen
+ * through the window — mirrors the reference image's bright pink glow at
+ * the center of the view. Left fully transparent outside the gradient
+ * (no opaque background fill) so it composites as a glow, not a card. */
+export function paintFlareTexture(scene: Scene, coreHex: string, glowHex: string): DynamicTexture {
+  const texture = new DynamicTexture('spaceship-flare', { width: 512, height: 512 }, scene, false);
+  texture.hasAlpha = true;
+  const ctx = texture.getContext() as unknown as CanvasRenderingContext2D;
+  const size = 512;
+  const cx = size / 2;
+  const cy = size / 2;
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+  gradient.addColorStop(0, '#ffffff');
+  gradient.addColorStop(0.12, coreHex);
+  gradient.addColorStop(0.4, glowHex);
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  texture.update(false);
+  return texture;
+}
+
 export function paintCreatureTexture(scene: Scene, accent: string): DynamicTexture {
   return makeTexture(`spaceship-creature-${Math.random().toString(36).slice(2)}`, scene, 256, (ctx, size) => {
     ctx.fillStyle = 'rgba(4, 6, 16, 1)';
