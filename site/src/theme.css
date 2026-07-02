@@ -203,6 +203,72 @@ h3 {
   right: 0;
 }
 
+/* spaceship mode toggle: a pill matching .btn-ghost's gradient-border
+   treatment at rest, flipping to a solid gradient fill (like .btn-primary)
+   once inside the cockpit — so the button's own state visually mirrors
+   whether you're in the ship or not, not just its label text. */
+.spaceship-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  padding: 8px 16px 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+    var(--gradient) border-box;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.15s ease, opacity 0.15s ease;
+}
+.spaceship-toggle-icon {
+  font-size: 0.95em;
+  line-height: 1;
+}
+.spaceship-toggle:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -10px var(--shadow);
+}
+.spaceship-toggle:active:not(:disabled) {
+  transform: translateY(0);
+}
+.spaceship-toggle:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.spaceship-toggle:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+.spaceship-toggle:disabled .spaceship-toggle-icon {
+  animation: spaceship-toggle-pulse 1.1s ease-in-out infinite;
+}
+.spaceship-toggle[aria-pressed="true"] {
+  color: var(--accent-contrast);
+  background: var(--gradient);
+  box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.55);
+}
+.spaceship-toggle[aria-pressed="true"]:hover:not(:disabled) {
+  box-shadow: 0 12px 26px -8px rgba(79, 70, 229, 0.6);
+}
+@keyframes spaceship-toggle-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spaceship-toggle {
+    transition: none;
+  }
+  .spaceship-toggle:disabled .spaceship-toggle-icon {
+    animation: none;
+  }
+}
+
 /* site-wide backdrop: blueprint grid + gradient glow, fixed behind every
    section (not just the hero) — same trick as .bg-canvas-host, layered
    underneath it so the particles read crisply on top of the color wash. */
@@ -661,6 +727,30 @@ footer a { color: var(--accent); }
   }
   .site-nav a {
     font-size: 0.68rem;
+  }
+  /* "Space Ship Mode" / "Exit Ship" text doesn't fit next to the brand +
+     four links in this width without wrapping inside the pill or pushing
+     off-screen, so collapse to an icon-only circular button — the label
+     stays in the DOM (and keeps updating via JS) for screen readers, just
+     visually hidden. */
+  .spaceship-toggle {
+    padding: 8px;
+    gap: 0;
+    aspect-ratio: 1;
+  }
+  .spaceship-toggle-icon {
+    font-size: 1rem;
+  }
+  .spaceship-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
   .page {
     padding: 0 16px 40px;

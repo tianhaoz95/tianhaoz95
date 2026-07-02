@@ -9,7 +9,7 @@ export function renderNav(): HTMLElement {
       <a href="#projects">Projects</a>
       <a href="#contact">Contact</a>
     </div>
-    <button class="spaceship-toggle" type="button" aria-pressed="false">🚀 <span>Space Ship Mode</span></button>
+    <button class="spaceship-toggle" type="button" aria-pressed="false"><span class="spaceship-toggle-icon">🚀</span><span class="spaceship-toggle-label">Space Ship Mode</span></button>
   `;
   return nav;
 }

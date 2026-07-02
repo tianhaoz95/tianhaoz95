@@ -50,7 +50,7 @@ function main() {
   let spaceship: SpaceshipController | null = null;
 
   function setToggleLabel(label: string) {
-    const labelEl = toggleBtn.querySelector('span');
+    const labelEl = toggleBtn.querySelector('.spaceship-toggle-label');
     if (labelEl) labelEl.textContent = label;
   }
 
