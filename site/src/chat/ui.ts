@@ -31,9 +31,12 @@ export interface ChatUIController {
   setStatus: (kind: 'text' | 'vision', info: StatusInfo) => void;
   setBusy: (busy: boolean) => void;
   setInputPlaceholder: (text: string) => void;
+  setHeaderTitle: (text: string) => void;
   clearImagePreview: () => void;
   getPendingImage: () => File | null;
 }
+
+const DEFAULT_HEADER_TITLE = 'Ask about this profile';
 
 const DEFAULT_PLACEHOLDER = 'Ask about skills, projects, or contact info…';
 
@@ -100,6 +103,7 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
   `;
   document.body.appendChild(panel);
 
+  const headerTitle = panel.querySelector('.chat-header h2') as HTMLHeadingElement;
   const messagesEl = panel.querySelector('.chat-messages') as HTMLDivElement;
   const textarea = panel.querySelector('textarea') as HTMLTextAreaElement;
   const sendBtn = panel.querySelector('.chat-send') as HTMLButtonElement;
@@ -271,6 +275,9 @@ export function initChatUI(handlers: ChatUIHandlers): ChatUIController {
     },
     setInputPlaceholder(text) {
       textarea.placeholder = text || DEFAULT_PLACEHOLDER;
+    },
+    setHeaderTitle(text) {
+      headerTitle.textContent = text || DEFAULT_HEADER_TITLE;
     },
     clearImagePreview() {
       pendingImage = null;

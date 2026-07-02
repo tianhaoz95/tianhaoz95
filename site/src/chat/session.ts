@@ -12,6 +12,15 @@ const SYSTEM_PROMPT =
   'get_profile_section tool — never guess or invent details about his work. For anything ' +
   'unrelated to this profile, answer briefly and helpfully as a general assistant. Keep replies concise.';
 
+// Layered on top of SYSTEM_PROMPT (not a replacement) while Spaceship Mode
+// is active — same facts, same tool, just a warmer in-universe voice for
+// the "AI co-pilot" framing. Toggled via setCopilotMode() from
+// spaceship/copilot.ts.
+const COPILOT_ADDENDUM =
+  ' Right now you are also role-playing as the ship\'s onboard AI co-pilot in "Space Ship Mode" — ' +
+  "keep every factual answer exactly as accurate as usual, but deliver it with a warm, adventurous " +
+  'sci-fi co-pilot voice (e.g. referring to profile sections as "logs" or "data banks"). Keep replies concise.';
+
 const TOOL_CALL_RE = /<tool_call>\s*({[\s\S]*?})\s*<\/tool_call>/;
 const MAX_TOOL_ROUNDS = 2;
 
@@ -229,7 +238,15 @@ async function handleSend(ui: ChatUIController, text: string, imageFile: File | 
   }
 }
 
-export function initChatSidebar(): void {
+// Space Ship Mode re-skins this same chat (workers, tool-calling, message
+// history all untouched) into an in-cockpit "AI co-pilot" — this just swaps
+// the live system-message content in place so the next generation picks it
+// up, with zero changes to handleSend or the worker protocol.
+export function setCopilotMode(active: boolean): void {
+  messages[0].content = active ? SYSTEM_PROMPT + COPILOT_ADDENDUM : SYSTEM_PROMPT;
+}
+
+export function initChatSidebar(): ChatUIController {
   const ui: ChatUIController = initChatUI({
     onSend: (text, imageFile) => {
       void handleSend(ui, text, imageFile);
@@ -257,4 +274,6 @@ export function initChatSidebar(): void {
           'or with limited available memory. Try a recent Chrome/Edge, close other tabs, and reload.',
       );
     });
+
+  return ui;
 }

@@ -1,3 +1,8 @@
+export interface BackgroundCanvasController {
+  pause: () => void;
+  resume: () => void;
+}
+
 /**
  * Site-wide particle-network background — a single fixed canvas behind
  * every section (not just the hero), drawn fresh every frame instead of
@@ -6,7 +11,7 @@
  * link to / gently flee the cursor so the background feels alive rather
  * than decorative.
  */
-export function initBackgroundCanvas(): void {
+export function initBackgroundCanvas(): BackgroundCanvasController {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const host = document.createElement('div');
@@ -18,7 +23,7 @@ export function initBackgroundCanvas(): void {
   host.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) return { pause: () => {}, resume: () => {} };
 
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const LINK_DIST = 140;
@@ -40,6 +45,8 @@ export function initBackgroundCanvas(): void {
   let pointerX = 0;
   let pointerY = 0;
   let lastPointerMove = 0;
+  let paused = false;
+  let rafId = 0;
 
   function nodeCountFor(area: number): number {
     return Math.round(Math.min(100, Math.max(36, area / 16000)));
@@ -146,9 +153,10 @@ export function initBackgroundCanvas(): void {
   }
 
   function loop(): void {
+    if (paused) return;
     step();
     draw();
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
   }
 
   resize();
@@ -169,6 +177,25 @@ export function initBackgroundCanvas(): void {
 
   window.addEventListener('resize', () => {
     resize();
-    if (prefersReducedMotion) draw();
+    if (prefersReducedMotion || paused) draw();
   });
+
+  return {
+    // Cancels the RAF loop and hides the (fully covered) canvas host so it
+    // isn't even composited — used while another full-viewport layer (e.g.
+    // spaceship mode) is on top of it.
+    pause() {
+      if (paused) return;
+      paused = true;
+      cancelAnimationFrame(rafId);
+      host.classList.add('bg-canvas-host--paused');
+    },
+    resume() {
+      if (!paused) return;
+      paused = false;
+      host.classList.remove('bg-canvas-host--paused');
+      if (prefersReducedMotion) draw();
+      else loop();
+    },
+  };
 }

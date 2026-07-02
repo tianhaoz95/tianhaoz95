@@ -44,6 +44,9 @@ body {
   height: 100%;
   opacity: 0.8;
 }
+.bg-canvas-host--paused {
+  display: none;
+}
 
 .page {
   max-width: 880px;
