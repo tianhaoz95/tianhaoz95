@@ -10,16 +10,17 @@ import {
   Vector3,
   type Scene,
 } from '@babylonjs/core';
-import { paintHudScreen, type HudScreenVariant } from './textures';
+import { createHullSurface, paintHudScreen, type HudScreenVariant } from './textures';
 import { themeColor3, themeColorHex } from './themeColors';
 import type { CockpitButtonId, CockpitHandles } from './types';
 
 // Cyberpunk-dark rather than mid-grey: real contrast comes from the neon
 // trim/screens below, not from the base surfaces being bright. (An earlier,
 // much darker pass was indistinguishable from the black void outside —
-// this is deliberately a middle ground informed by that.)
-const HULL_COLOR = new Color3(0.07, 0.08, 0.11);
-const TRIM_COLOR = new Color3(0.12, 0.13, 0.18);
+// this is deliberately a middle ground informed by that.) These hexes are
+// baked into the procedural panel textures as the base metal tone.
+const HULL_HEX = '#12141c';
+const TRIM_HEX = '#1f2230';
 const MAGENTA = '#e026c9';
 
 // Single source of truth for the thruster's travel range, in cockpitRig-
@@ -67,8 +68,22 @@ export function buildCockpit(scene: Scene, glow: GlowLayer): CockpitHandles {
   dashLight.intensity = 0.75;
   dashLight.diffuse = new Color3(0.75, 0.8, 1);
 
-  const hullMat = unlitMaterial(scene, 'spaceship-hull-mat', HULL_COLOR);
-  const trimMat = unlitMaterial(scene, 'spaceship-trim-mat', TRIM_COLOR, new Color3(0.015, 0.02, 0.035));
+  // Metal panel surfaces: procedural diffuse + normal-map pairs (seams,
+  // rivets, brushed streaks) with real specular, so the dash light and the
+  // distant sun produce sheen and per-pixel relief instead of flat color.
+  function metalMaterial(name: string, baseHex: string, panelScale: number, emissive?: Color3): StandardMaterial {
+    const surface = createHullSurface(scene, name, baseHex, panelScale);
+    const mat = new StandardMaterial(name, scene);
+    mat.diffuseTexture = surface.diffuse;
+    mat.bumpTexture = surface.bump;
+    mat.specularColor = new Color3(0.3, 0.32, 0.4);
+    mat.specularPower = 48;
+    if (emissive) mat.emissiveColor = emissive;
+    return mat;
+  }
+
+  const hullMat = metalMaterial('spaceship-hull-mat', HULL_HEX, 1);
+  const trimMat = metalMaterial('spaceship-trim-mat', TRIM_HEX, 0.7, new Color3(0.015, 0.02, 0.035));
 
   const accentHex = themeColorHex('--accent', '#4f46e5');
   const accent2Hex = themeColorHex('--accent-2', '#06b6d4');
@@ -151,6 +166,34 @@ export function buildCockpit(scene: Scene, glow: GlowLayer): CockpitHandles {
   dashboard.rotation.x = -0.32;
   dashboard.material = hullMat;
 
+  // Floor plate under the console, so looking down during a dive shows
+  // hull instead of the void leaking through the bottom of the cockpit.
+  const floor = MeshBuilder.CreateBox('spaceship-floor', { width: 3.8, height: 0.12, depth: 2.8 }, scene);
+  floor.parent = cockpitRig;
+  floor.position.set(0, 0.28, 0.3);
+  floor.material = hullMat;
+
+  // Angled wing consoles wrapping the dashboard's ends toward the pilot —
+  // real cockpits enclose the pilot in a horseshoe, not a single flat desk.
+  for (const side of [-1, 1]) {
+    const wing = MeshBuilder.CreateBox(`spaceship-wing-${side}`, { width: 0.95, height: 0.45, depth: 1.0 }, scene);
+    wing.parent = cockpitRig;
+    wing.position.set(side * 1.72, 0.66, 0.68);
+    wing.rotation.y = -side * 0.55;
+    wing.rotation.x = -0.22;
+    wing.material = hullMat;
+    hudScreen(
+      `spaceship-wing-screen-${side}`,
+      wing,
+      new Vector3(0, 0.24, 0),
+      new Vector3(Math.PI / 2, 0, 0),
+      0.3,
+      0.22,
+      side > 0 ? 'radar' : 'wave',
+      side > 0 ? accent2Hex : MAGENTA,
+    );
+  }
+
   // Glowing seam along the dashboard's front-top edge, and a second row of
   // small data screens set slightly further back than the physical
   // buttons — a "buttons in front, readouts behind" layered console.
@@ -206,6 +249,15 @@ export function buildCockpit(scene: Scene, glow: GlowLayer): CockpitHandles {
     for (let i = 0; i < 3; i++) {
       knob(`spaceship-pillar-knob-${side}-${i}`, pillar, new Vector3(-side * 0.16, -0.3 + i * 0.22, 0.35));
     }
+
+    // Canopy strut leaning from the dashboard edge up to the header — the
+    // diagonal frame member every real fighter/shuttle canopy has. Thin
+    // enough (0.07) to frame the window without blocking the view.
+    const strut = MeshBuilder.CreateBox(`spaceship-strut-${side}`, { width: 0.07, height: 1.5, depth: 0.09 }, scene);
+    strut.parent = cockpitRig;
+    strut.position.set(side * 1.35, 1.6, 0.5);
+    strut.rotation.z = side * 0.38;
+    strut.material = trimMat;
   }
 
   // Steering stick: a pivot at the base, visible shaft+ball as a child so

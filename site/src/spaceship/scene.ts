@@ -2,6 +2,7 @@ import {
   Color3,
   Color4,
   Constants,
+  DirectionalLight,
   Engine,
   GlowLayer,
   HemisphericLight,
@@ -43,8 +44,17 @@ export function createSceneRig(host: HTMLElement): SceneRig {
   // every maneuver. The dashboard's own point light lives in cockpit.ts,
   // parented to the rig so it actually travels with the ship.
   const ambient = new HemisphericLight('spaceship-ambient', new Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.55;
+  ambient.intensity = 0.42;
   ambient.groundColor = new Color3(0.1, 0.1, 0.14);
+
+  // Key "sun" light aligned with the distant flare below, so planets and
+  // meteors get a real day/night terminator (a lit crescent facing the
+  // flare) instead of the shapeless uniform fill ambient-only lighting
+  // gave them. Direction = from the flare's position toward the origin.
+  const sun = new DirectionalLight('spaceship-sun', new Vector3(-460, -140, -640).normalize(), scene);
+  sun.intensity = 1.1;
+  sun.diffuse = new Color3(1, 0.95, 0.88);
+  sun.specular = new Color3(0.9, 0.87, 0.8);
 
   // A small blurKernelSize matters here: the default (32px) blooms small
   // cockpit details (buttons, stick, thruster — a few tens of pixels on
@@ -73,7 +83,9 @@ export function createSceneRig(host: HTMLElement): SceneRig {
   // the ship flies toward it, but does drift across the window as the ship
   // turns — like a real distant light source would.
   const flare = MeshBuilder.CreatePlane('spaceship-flare', { size: 160 }, scene);
-  flare.position.set(120, 40, 820);
+  // Off to the upper-right rather than dead ahead, matching the sun
+  // light's direction so lit crescents point back at a visible source.
+  flare.position.set(460, 140, 640);
   flare.billboardMode = Mesh.BILLBOARDMODE_ALL;
   flare.infiniteDistance = true;
   flare.isPickable = false;

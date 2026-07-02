@@ -1,18 +1,22 @@
 import {
   Color3,
+  FresnelParameters,
   GlowLayer,
   Mesh,
   MeshBuilder,
   StandardMaterial,
   TransformNode,
   Vector3,
+  VertexBuffer,
+  VertexData,
   type Scene,
 } from '@babylonjs/core';
 import {
   createMeteorTexturePool,
+  createPlanetSurface,
   paintAccretionDiskTexture,
   paintCreatureTexture,
-  paintPlanetTexture,
+  paintPlanetRingTexture,
 } from './textures';
 import { themeColorHex } from './themeColors';
 
@@ -83,15 +87,45 @@ export function createSpaceObjects(scene: Scene, shipNode: TransformNode, glow: 
 
   function spawnMeteor() {
     const size = 0.6 + Math.random() * 1.6;
-    const mesh = MeshBuilder.CreatePolyhedron(
+    // A displaced icosphere reads as an actual space rock where the old
+    // platonic polyhedra read as dice. flat:true keeps faceted shading
+    // (right for rock), and because the displacement is a pure function of
+    // vertex position, the duplicated flat-shaded verts sharing a corner
+    // all move together — no cracks.
+    const mesh = MeshBuilder.CreateIcoSphere(
       `spaceship-meteor-${Date.now()}`,
-      { type: Math.floor(Math.random() * 4), size },
+      { radius: size, subdivisions: 2, flat: true },
       scene,
     );
+    const positions = mesh.getVerticesData(VertexBuffer.PositionKind)!;
+    const s1 = Math.random() * 10;
+    const s2 = Math.random() * 10;
+    const s3 = Math.random() * 10;
+    for (let i = 0; i < positions.length; i += 3) {
+      const u = positions[i] / size;
+      const v = positions[i + 1] / size;
+      const w = positions[i + 2] / size;
+      const f =
+        1 +
+        0.26 * Math.sin(u * 2.3 + s1) * Math.cos(v * 1.9 + s2) +
+        0.16 * Math.sin(w * 3.1 + s3) * Math.cos(u * 2.6 + s2) +
+        0.08 * Math.sin((u + v + w) * 4.2 + s1);
+      positions[i] *= f;
+      positions[i + 1] *= f;
+      positions[i + 2] *= f;
+    }
+    mesh.updateVerticesData(VertexBuffer.PositionKind, positions);
+    const normals = mesh.getVerticesData(VertexBuffer.NormalKind)!;
+    VertexData.ComputeNormals(positions, mesh.getIndices()!, normals);
+    mesh.updateVerticesData(VertexBuffer.NormalKind, normals);
+    mesh.scaling.set(1, 0.7 + Math.random() * 0.45, 0.8 + Math.random() * 0.35);
+
     mesh.position.copyFrom(spawnPointAhead(50));
     const mat = new StandardMaterial('spaceship-meteor-mat', scene);
-    mat.diffuseTexture = meteorTextures[Math.floor(Math.random() * meteorTextures.length)];
-    mat.specularColor = new Color3(0.05, 0.05, 0.05);
+    const rock = meteorTextures[Math.floor(Math.random() * meteorTextures.length)];
+    mat.diffuseTexture = rock.diffuse;
+    mat.bumpTexture = rock.bump;
+    mat.specularColor = new Color3(0.04, 0.04, 0.04);
     mesh.material = mat;
 
     const velocity = new Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 1, (Math.random() - 0.5) * 2);
@@ -104,21 +138,43 @@ export function createSpaceObjects(scene: Scene, shipNode: TransformNode, glow: 
   function spawnPlanet() {
     const isGasGiant = Math.random() > 0.5;
     const diameter = isGasGiant ? 30 + Math.random() * 20 : 14 + Math.random() * 10;
-    const mesh = MeshBuilder.CreateSphere(`spaceship-planet-${Date.now()}`, { diameter, segments: 24 }, scene);
+    const hue = Math.random() * 360;
+    const mesh = MeshBuilder.CreateSphere(`spaceship-planet-${Date.now()}`, { diameter, segments: 32 }, scene);
     mesh.position.copyFrom(spawnPointAhead(160));
     mesh.position.y -= 20; // keep planets from constantly filling the direct forward view
     const mat = new StandardMaterial('spaceship-planet-mat', scene);
-    mat.diffuseTexture = paintPlanetTexture(scene, isGasGiant ? 'gas-giant' : 'rocky', Math.random() * 360);
+    const surface = createPlanetSurface(scene, isGasGiant ? 'gas-giant' : 'rocky', hue);
+    mat.diffuseTexture = surface.diffuse;
+    if (surface.bump) mat.bumpTexture = surface.bump;
     mat.specularColor = new Color3(0.02, 0.02, 0.02);
+    // Atmosphere: a fresnel-driven emissive rim so the limb of the planet
+    // glows faintly against space, the way an atmosphere scatters light.
+    // Kept faint: at grazing view angles the fresnel term covers most of
+    // the visible surface, and a stronger emissive washes the whole planet
+    // into one flat color (seen with a close gas giant filling a corner).
+    mat.emissiveColor = isGasGiant
+      ? Color3.FromHSV(hue, 0.45, 0.16)
+      : new Color3(0.06, 0.1, 0.18);
+    const rim = new FresnelParameters();
+    rim.bias = 0.22;
+    rim.power = 4.5;
+    rim.leftColor = Color3.White();
+    rim.rightColor = Color3.Black();
+    mat.emissiveFresnelParameters = rim;
     mesh.material = mat;
 
     if (isGasGiant && Math.random() > 0.4) {
-      const ring = MeshBuilder.CreateTorus(`spaceship-planet-ring-${Date.now()}`, { diameter: diameter * 1.7, thickness: diameter * 0.06, tessellation: 48 }, scene);
+      // A flat annulus disc (real rings are millimeters thick at this
+      // scale), alpha-textured with band structure — not a fat torus.
+      const ring = MeshBuilder.CreateDisc(`spaceship-planet-ring-${Date.now()}`, { radius: diameter * 1.1, tessellation: 96 }, scene);
       ring.parent = mesh;
-      ring.rotation.x = Math.PI / 2.2;
+      ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
       const ringMat = new StandardMaterial('spaceship-ring-mat', scene);
-      ringMat.diffuseColor = new Color3(0.6, 0.55, 0.45);
-      ringMat.alpha = 0.7;
+      const ringTexture = paintPlanetRingTexture(scene);
+      ringMat.diffuseTexture = ringTexture;
+      ringMat.useAlphaFromDiffuseTexture = true;
+      ringMat.backFaceCulling = false;
+      ringMat.specularColor = new Color3(0.01, 0.01, 0.01);
       ring.material = ringMat;
     }
 
@@ -171,24 +227,48 @@ export function createSpaceObjects(scene: Scene, shipNode: TransformNode, glow: 
   }
 
   function spawnBlackHole() {
+    // Event-horizon shadow: a pure-black unlit sphere.
     const core = MeshBuilder.CreateSphere(`spaceship-blackhole-${Date.now()}`, { diameter: 14, segments: 24 }, scene);
     const coreMat = new StandardMaterial('spaceship-blackhole-core-mat', scene);
+    coreMat.disableLighting = true;
     coreMat.diffuseColor = Color3.Black();
     coreMat.specularColor = Color3.Black();
     core.material = coreMat;
     core.position.copyFrom(spawnPointAhead(60));
 
-    const disk = MeshBuilder.CreateTorus('spaceship-blackhole-disk', { diameter: 26, thickness: 3.2, tessellation: 64 }, core.getScene());
-    disk.parent = core;
-    disk.rotation.x = Math.PI / 2.3;
+    // Tilt node so the accretion disk can spin in its own inclined plane
+    // (animating rotation.z below) without wobbling like a coin.
+    const tilt = new TransformNode(`spaceship-blackhole-tilt-${Date.now()}`, scene);
+    tilt.parent = core;
+    tilt.rotation.x = Math.PI / 2.25;
+
+    // Flat accretion disc — alpha-blended so the texture's transparent
+    // center hole and outer falloff read as glowing gas, not a solid card.
+    const disk = MeshBuilder.CreateDisc('spaceship-blackhole-disk', { radius: 15, tessellation: 96 }, scene);
+    disk.parent = tilt;
     const diskMat = new StandardMaterial('spaceship-blackhole-disk-mat', scene);
-    diskMat.emissiveTexture = paintAccretionDiskTexture(scene, themeColorHex('--accent', '#4f46e5'), themeColorHex('--accent-2', '#06b6d4'));
-    diskMat.diffuseColor = Color3.Black();
-    diskMat.emissiveColor = Color3.White();
+    diskMat.disableLighting = true;
+    diskMat.backFaceCulling = false;
+    const diskTexture = paintAccretionDiskTexture(scene, themeColorHex('--accent', '#4f46e5'), themeColorHex('--accent-2', '#06b6d4'));
+    diskMat.emissiveTexture = diskTexture;
+    diskMat.opacityTexture = diskTexture;
     disk.material = diskMat;
     glow.addIncludedOnlyMesh(disk);
 
-    track(core, Vector3.Zero(), new Vector3(0, 0.15, 0));
+    // Photon ring: the thin white-hot circle of lensed light hugging the
+    // shadow's edge in every real black-hole image.
+    const photonRing = MeshBuilder.CreateTorus('spaceship-blackhole-photon-ring', { diameter: 14.6, thickness: 0.22, tessellation: 96 }, scene);
+    photonRing.parent = tilt;
+    const ringColor = Color3.FromHexString('#ffefd8');
+    const photonMat = new StandardMaterial('spaceship-blackhole-photon-mat', scene);
+    photonMat.disableLighting = true;
+    photonMat.emissiveColor = ringColor;
+    photonRing.material = photonMat;
+    glow.addIncludedOnlyMesh(photonRing);
+
+    track(core, Vector3.Zero(), Vector3.Zero(), (dt) => {
+      disk.rotation.z += dt * 0.25;
+    });
     blackholeCount += 1;
     core.metadata = { kind: 'blackhole' };
   }
@@ -234,18 +314,33 @@ export function createSpaceObjects(scene: Scene, shipNode: TransformNode, glow: 
         else if (kind === 'planet') planetCount -= 1;
         else if (kind === 'creature') creatureCount -= 1;
         else if (kind === 'blackhole') blackholeCount -= 1;
-        obj.root.dispose(false, true);
+        disposeObject(obj);
         live.delete(obj);
       }
     }
   });
 
+  function disposeObject(obj: LiveObject) {
+    if ((obj.root as Mesh).metadata?.kind === 'meteor') {
+      // Meteor materials share the pooled rock textures — dispose the
+      // material alone (dispose(false, true) would take the shared pool
+      // textures down with it and break every later meteor).
+      (obj.root as Mesh).material?.dispose();
+      obj.root.dispose(false, false);
+    } else {
+      obj.root.dispose(false, true);
+    }
+  }
+
   return {
     dispose() {
       scene.onBeforeRenderObservable.remove(observer);
-      for (const obj of live) obj.root.dispose(false, true);
+      for (const obj of live) disposeObject(obj);
       live.clear();
-      for (const tex of meteorTextures) tex.dispose();
+      for (const rock of meteorTextures) {
+        rock.diffuse.dispose();
+        rock.bump.dispose();
+      }
     },
   };
 }
